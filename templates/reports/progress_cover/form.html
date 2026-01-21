@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- ================= HEADER ================= -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <a href="{% url 'reports:progress_cover_list' %}"
+       class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold transition">
+      ← Back to Progress Covers
+    </a>
+    <h2 class="text-xl font-bold text-gray-800">
+      {% if form.instance.pk %}Update Progress Cover{% else %}Generate Progress Cover{% endif %}
+    </h2>
+  </div>
+
+  <!-- ================= FORM CARD ================= -->
+  <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow space-y-6">
+    {% csrf_token %}
+
+    <!-- Non-field errors -->
+    {% if form.non_field_errors %}
+      <div class="text-red-600 text-sm mb-2">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <!-- Form Fields -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 text-sm">
+      {% for field in form %}
+      <div class="flex flex-col">
+        <label class="font-medium mb-1 text-gray-700">{{ field.label|safe }}</label>
+
+        {{ field|add_class:"border-2 border-gray-400 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" }}
+
+        {% if field.help_text %}
+          <p class="text-gray-400 text-xs mt-1">{{ field.help_text }}</p>
+        {% endif %}
+
+        {% for error in field.errors %}
+          <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+
+        {% if field.name == 'cover_image' and form.instance.cover_image %}
+          <p class="text-gray-500 text-xs mt-1">Current Image:</p>
+          <img src="{{ form.instance.cover_image.url }}" class="w-32 h-auto mt-1 rounded border" alt="Current Cover">
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-3 mt-6 flex-wrap">
+      <a href="{% url 'reports:progress_cover_list' %}"
+         class="px-5 py-2 rounded shadow bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition">
+        Cancel
+      </a>
+      <button type="submit"
+              class="px-5 py-2 rounded shadow bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+        {% if form.instance.pk %}Update Cover{% else %}Generate Cover{% endif %}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

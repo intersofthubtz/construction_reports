@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Delete Project Image{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-lg">
+  <h2 class="text-xl font-semibold mb-4">Delete Project Image</h2>
+
+  <form method="post" class="bg-white shadow rounded p-6">
+    {% csrf_token %}
+
+    <p class="mb-4">
+      Are you sure you want to delete the image 
+      <strong>{{ image_obj.figure_name }}</strong> 
+      for project <strong>{{ image_obj.project.project_name }}</strong> 
+      dated <strong>{{ image_obj.image_date }}</strong>?
+    </p>
+
+    <!-- Optional: show small preview of image -->
+    <div class="mb-4">
+      <img src="{{ image_obj.image.url }}" alt="{{ image_obj.figure_name }}" class="w-40 h-40 object-cover rounded shadow">
+    </div>
+
+    <div class="flex gap-3">
+      <button type="submit"
+              class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        Yes, Delete
+      </button>
+
+      <a href="{% url 'sitemanage:site_project_image_list' %}"
+         class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

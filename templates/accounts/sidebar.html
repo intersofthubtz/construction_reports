@@ -1,0 +1,316 @@
+{% load static %}
+
+<aside :class="sidebarOpen ? 'w-64' : 'w-20'"
+       class="bg-[#0F5391] text-white flex flex-col transition-all duration-300 h-screen">
+
+  <!-- BRAND -->
+  <div class="px-4 py-4 flex items-center justify-between border-b border-blue-800">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 bg-white rounded-md flex items-center justify-center">
+        <img src="{% static 'images/nhc_logo.jpg' %}" alt="NHC Logo"
+             class="object-contain transition-all duration-300"
+             :class="sidebarOpen ? 'w-8 h-8' : 'w-6 h-6'"/>
+      </div>
+      <span x-show="sidebarOpen" x-cloak
+            class="ml-2 text-lg font-bold tracking-wide whitespace-nowrap">
+        NHC DC
+      </span>
+    </div>
+    <button @click="sidebarOpen = !sidebarOpen" aria-label="Toggle sidebar">
+      <span class="material-icons">menu</span>
+    </button>
+  </div>
+
+  <hr class="border-blue-700" />
+
+  <!-- MENU -->
+  <nav class="flex-1 px-2 py-4 space-y-1 text-sm overflow-y-auto">
+
+    <!-- Dashboard -->
+    {% if sidebar_perms.dashboard %}
+    <a href="{% url 'accounts:dashboard' %}"
+       class="flex items-center gap-3 px-3 py-2 rounded transition
+       {% if request.resolver_match.url_name == 'dashboard' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+      <span class="material-icons">dashboard</span>
+      <span x-show="sidebarOpen" x-cloak>Dashboard</span>
+    </a>
+    {% endif %}
+
+    <!-- Projects -->
+    {% if sidebar_perms.projects %}
+    <a href="{% url 'projects:project_list' %}"
+       class="flex items-center gap-3 px-3 py-2 rounded transition
+       {% if request.resolver_match.app_name == 'projects' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+      <span class="material-icons">folder</span>
+      <span x-show="sidebarOpen" x-cloak>Projects</span>
+    </a>
+    {% endif %}
+
+    <!-- Resources Dropdown -->
+    {% if sidebar_perms.resources %}
+    <div x-data="{ open: {{ active_parent.resources|yesno:'true,false' }} }" class="relative" @click.outside="open = false">
+      <button @click="open = !open"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded transition
+              {% if request.resolver_match.app_name == 'resources' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+        <span class="material-icons">menu_book</span>
+        <span x-show="sidebarOpen" x-cloak class="flex-1 text-left">Resources</span>
+        <span x-show="sidebarOpen" class="material-icons text-sm" :class="{ 'rotate-180': open }">expand_more</span>
+      </button>
+
+      <div x-show="open && sidebarOpen" x-transition class="ml-8 mt-1 flex flex-col space-y-1">
+        {% if resources_children.equipment %}
+        <a href="{% url 'resources:equipment_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">precision_manufacturing</span>
+          <span>Equipment</span>
+        </a>
+        {% endif %}
+        {% if resources_children.manpower %}
+        <a href="{% url 'resources:manpower_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">groups</span>
+          <span>Manpower</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Finance Dropdown -->
+    {% if sidebar_perms.finance %}
+    <div x-data="{ open: {{ active_parent.finance|yesno:'true,false' }} }" class="relative" @click.outside="open = false">
+      <button @click="open = !open"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded transition
+              {% if request.resolver_match.app_name == 'finance' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+        <span class="material-icons">account_balance</span>
+        <span x-show="sidebarOpen" x-cloak class="flex-1 text-left">Finance</span>
+        <span x-show="sidebarOpen" class="material-icons text-sm" :class="{ 'rotate-180': open }">expand_more</span>
+      </button>
+
+      <div x-show="open && sidebarOpen" x-transition class="ml-8 mt-1 flex flex-col space-y-1">
+        {% if finance_children.payment_certificate %}
+        <a href="{% url 'finance:payment_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">receipt_long</span>
+          <span>HQ Payments</span>
+        </a>
+        {% endif %}
+        {% if finance_children.fund_transaction %}
+        <a href="{% url 'finance:transaction_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">sync_alt</span>
+          <span>Fund Utilization</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Site Management Dropdown -->
+    {% if sidebar_perms.sitemanage %}
+    <div x-data="{ open: {{ active_parent.sitemanage|yesno:'true,false' }} }" class="relative" @click.outside="open = false">
+      <button @click="open = !open"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded transition
+              {% if request.resolver_match.app_name == 'sitemanage' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+        <span class="material-icons">location_city</span>
+        <span x-show="sidebarOpen" x-cloak class="flex-1 text-left">Site Management</span>
+        <span x-show="sidebarOpen" class="material-icons text-sm" :class="{ 'rotate-180': open }">expand_more</span>
+      </button>
+
+      <div x-show="open && sidebarOpen" x-transition class="ml-8 mt-1 flex flex-col space-y-1">
+        {% if sitemanage_children.overview %}
+        <a href="{% url 'sitemanage:site_overview' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">view_quilt</span>
+          <span>Site Overview</span>
+        </a>
+        {% endif %}
+        {% if sitemanage_children.activity %}
+        <a href="{% url 'sitemanage:activity_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">history</span>
+          <span>Activity</span>
+        </a>
+        {% endif %}
+        {% if sitemanage_children.visitor %}
+        <a href="{% url 'sitemanage:site_visitor_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">person</span>
+          <span>Site Visitor</span>
+        </a>
+        {% endif %}
+        {% if sitemanage_children.photos %}
+        <a href="{% url 'sitemanage:site_project_image_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">photo_camera</span>
+          <span>Project Photos</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Quality Control Dropdown -->
+    {% if sidebar_perms.quality %}
+    <div x-data="{ open: {{ active_parent.quality|yesno:'true,false' }} }" class="relative" @click.outside="open = false">
+      <button @click="open = !open"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded transition
+              {% if request.resolver_match.app_name == 'quality' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+        <span class="material-icons">verified</span>
+        <span x-show="sidebarOpen" x-cloak class="flex-1 text-left">Quality Control</span>
+        <span x-show="sidebarOpen" class="material-icons text-sm" :class="{ 'rotate-180': open }">expand_more</span>
+      </button>
+
+      <div x-show="open && sidebarOpen" x-transition class="ml-8 mt-1 flex flex-col space-y-1">
+        {% if quality_children.material_test %}
+        <a href="{% url 'quality:material_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">science</span>
+          <span>Material Tests</span>
+        </a>
+        {% endif %}
+        {% if quality_children.work_approval %}
+        <a href="{% url 'quality:work_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">check_circle</span>
+          <span>Work Approvals</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Compliance -->
+    {% if sidebar_perms.compliance %}
+    <a href="{% url 'compliance:compliance_list' %}" class="flex items-center gap-3 px-3 py-2 rounded transition
+       {% if request.resolver_match.app_name == 'compliance' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+      <span class="material-icons">verified_user</span>
+      <span x-show="sidebarOpen" x-cloak>Compliance</span>
+    </a>
+    {% endif %}
+
+<!-- Reports -->
+{% if sidebar_perms.reports %}
+<div x-data="{ open: {{ active_parent.reports|yesno:'true,false' }} }"
+     class="relative"
+     @click.outside="open = false">
+
+  <button @click="open = !open"
+          class="w-full flex items-center gap-3 px-3 py-2 rounded transition
+          {% if request.resolver_match.app_name == 'reports' %}
+            bg-blue-700
+          {% else %}
+            hover:bg-blue-700
+          {% endif %}">
+    <span class="material-icons">bar_chart</span>
+    <span x-show="sidebarOpen" x-cloak class="flex-1 text-left">Reports</span>
+    <span x-show="sidebarOpen"
+          class="material-icons text-sm"
+          :class="{ 'rotate-180': open }">
+      expand_more
+    </span>
+  </button>
+
+  <!-- CHILD REPORTS -->
+  <div x-show="open && sidebarOpen"
+       x-transition
+       class="ml-8 mt-1 flex flex-col space-y-1">
+
+    {% if reports_children.progress_cover %}
+    <a href="{% url 'reports:progress_cover_list' %}"
+       class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-sm">picture_as_pdf</span>
+      <span>Progress Cover (PDF)</span>
+    </a>
+    {% endif %}
+
+    {% if reports_children.project %}
+    <a href="{% url 'reports:project_report' %}"
+       class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-sm">folder_open</span>
+      <span>Project Reports</span>
+    </a>
+    {% endif %}
+
+    {% if reports_children.progress %}
+    <a href="{% url 'reports:progress_report' %}"
+       class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-sm">trending_up</span>
+      <span>Project Progress</span>
+    </a>
+    {% endif %}
+
+    {% if reports_children.resources %}
+    <a href="{% url 'reports:resources_report' %}"
+       class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-sm">menu_book</span>
+      <span>Resources</span>
+    </a>
+    {% endif %}
+
+    {% if reports_children.finance %}
+    <a href="{% url 'reports:finance_report' %}"
+       class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-sm">account_balance</span>
+      <span>Finance Reports</span>
+    </a>
+    {% endif %}
+
+    {% if reports_children.quality %}
+    <a href="{% url 'reports:quality_report' %}"
+       class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+      <span class="material-icons text-sm">verified</span>
+      <span>Quality Reports</span>
+    </a>
+    {% endif %}
+
+  </div>
+</div>
+{% endif %}
+
+
+
+    <!-- Setup Dropdown -->
+    {% if sidebar_perms.setup %}
+    <div x-data="{ open: {{ active_parent.setup|yesno:'true,false' }} }" class="relative" @click.outside="open = false">
+      <button @click="open = !open"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded transition
+              {% if request.resolver_match.app_name == 'setup' %} bg-blue-700 {% else %} hover:bg-blue-700 {% endif %}">
+        <span class="material-icons">settings</span>
+        <span x-show="sidebarOpen" x-cloak class="flex-1 text-left">Setup</span>
+        <span x-show="sidebarOpen" class="material-icons text-sm" :class="{ 'rotate-180': open }">expand_more</span>
+      </button>
+
+      <div x-show="open && sidebarOpen" x-transition class="ml-8 mt-1 flex flex-col space-y-1">
+        {% if setup_children.client %}
+        <a href="{% url 'setup:client_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">groups</span>
+          <span>Client Setup</span>
+        </a>
+        {% endif %}
+        {% if setup_children.contractor_type %}
+        <a href="{% url 'setup:contractor_type_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">category</span>
+          <span>Contractor Types</span>
+        </a>
+        {% endif %}
+        {% if setup_children.contractor %}
+        <a href="{% url 'setup:contractor_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">person</span>
+          <span>Contractors</span>
+        </a>
+        {% endif %}
+        {% if setup_children.project_role %}
+        <a href="{% url 'setup:project_role_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">badge</span>
+          <span>Project Roles</span>
+        </a>
+        {% endif %}
+        {% if setup_children.work_category %}
+        <a href="{% url 'setup:work_category_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">work_outline</span>
+          <span>Work Category</span>
+        </a>
+        {% endif %}
+        {% if setup_children.authority %}
+        <a href="{% url 'setup:authority_list' %}" class="px-3 py-1 rounded hover:bg-blue-600 flex items-center gap-2">
+          <span class="material-icons text-sm">supervisor_account</span>
+          <span>Board Authority</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </nav>
+</aside>

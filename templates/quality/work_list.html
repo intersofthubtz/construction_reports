@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Work Approvals{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+      <div class="px-4 py-2 rounded text-sm font-semibold
+        {% if message.tags == 'success' %}
+          bg-green-100 text-green-700
+        {% elif message.tags == 'error' %}
+          bg-red-100 text-red-700
+        {% else %}
+          bg-blue-100 text-blue-700
+        {% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h2 class="text-2xl font-bold text-gray-800">Work Approvals</h2>
+
+    {% if perms.quality.add_workapproval %}
+    <a href="{% url 'quality:work_add' %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-semibold">
+      + Approve Work
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex gap-3 mb-4 items-center">
+    <input type="text"
+           id="searchInput"
+           name="q"
+           value="{{ search|default:'' }}"
+           placeholder="Search by activity or user..."
+           class="px-4 py-2 border rounded w-full sm:w-80">
+
+    {% if search %}
+    <a href="{% url 'quality:work_list' %}"
+       class="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="bg-white shadow overflow-x-auto rounded">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr class="text-xs uppercase text-gray-600">
+          <th class="p-4 text-left">Activity</th>
+          <th class="p-4 text-left">Approved By</th>
+          <th class="p-4 text-left">Date</th>
+          <th class="p-4 text-left">Remarks</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        {% for a in approvals %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="p-4 font-semibold">{{ a.activity|capfirst }}</td>
+          <td class="p-4">{{ a.approved_by|capfirst }}</td>
+          <td class="p-4">{{ a.approval_date }}</td>
+          <td class="p-4">{{ a.remarks|default:"—"|capfirst }}</td>
+
+          <td class="p-4 flex justify-end gap-2">
+            {% if perms.quality.change_workapproval %}
+            <a href="{% url 'quality:work_edit' a.pk %}"
+               class="px-3 py-1 rounded bg-yellow-500 text-white text-xs font-semibold hover:bg-yellow-600">
+              Edit
+            </a>
+            {% endif %}
+
+            {% if perms.quality.delete_workapproval %}
+            <a href="{% url 'quality:work_delete' a.pk %}"
+               class="px-3 py-1 rounded bg-red-500 text-white text-xs font-semibold hover:bg-red-600">
+              Revoke
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-6 text-center text-gray-500">
+            No approvals found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% include "partials/pagination.html" with page_obj=approvals search=search %}
+
+</div>
+
+<!-- Debounced Search -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500);
+  });
+</script>
+
+{% endblock %}

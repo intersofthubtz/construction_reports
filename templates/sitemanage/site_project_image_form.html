@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6 flex-wrap">
+    <a href="{% url 'sitemanage:site_project_image_list' %}" 
+       class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold">
+      ← Back to Project Images
+    </a>
+    <h2 class="text-2xl font-bold text-gray-800">{{ page_title }}</h2>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    <div class="space-y-2">
+      {% for message in messages %}
+        <div class="px-4 py-2 rounded {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Form -->
+  <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow grid gap-6" x-data="imageUploader()">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block mb-1 font-medium text-gray-700">
+            {{ field.label }}
+          </label>
+
+          {% if field.name == "image" %}
+            <input type="file" name="image" multiple
+                   accept="image/png,image/jpeg,image/jpg"
+                   x-on:change="previewImages($event)"
+                   class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            
+            <!-- Image preview -->
+            <div class="mt-2 flex flex-wrap gap-2">
+              <template x-for="(img, index) in images" :key="index">
+                <div class="relative">
+                  <img :src="img" class="h-24 w-24 object-cover border rounded">
+                  <button type="button"
+                          class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1.5 hover:bg-red-700"
+                          x-on:click="removeImage(index)">
+                    &times;
+                  </button>
+                </div>
+              </template>
+
+              <!-- Existing images preview (editing) -->
+              {% if image %}
+                {% for img_obj in image %}
+                  <div class="relative">
+                    <img src="{{ img_obj.image.url }}" class="h-24 w-24 object-cover border rounded">
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+
+          {% else %}
+            {{ field|add_class:"border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" }}
+          {% endif %}
+
+          {% if field.help_text %}
+            <p class="text-gray-400 text-xs mt-1">{{ field.help_text }}</p>
+          {% endif %}
+
+          {% if field.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ field.errors|striptags }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-end gap-3 mt-6 flex-wrap">
+      <a href="{% url 'sitemanage:site_project_image_list' %}"
+         class="px-5 py-2 rounded shadow bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">
+        Cancel
+      </a>
+
+      <button type="submit"
+        class="px-5 py-2 rounded shadow bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">
+        {% if image %}Update Image{% else %}Upload Image{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Alpine.js for preview -->
+<script>
+function imageUploader() {
+    return {
+        images: [],
+        previewImages(event) {
+            this.images = [];
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = (e) => this.images.push(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        },
+        removeImage(index) {
+            this.images.splice(index, 1);
+            let dt = new DataTransfer();
+            let input = document.querySelector('input[name="image"]');
+            Array.from(input.files).forEach((file, i) => {
+                if (i !== index) dt.items.add(file);
+            });
+            input.files = dt.files;
+        }
+    }
+}
+</script>
+
+<!-- JS for project → activity dynamic loading -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const projectSelect = document.getElementById("id_project");
+    const activitySelect = document.getElementById("id_activity");
+
+    function loadActivities(projectId, selectedActivityId = null) {
+        if (!projectId) {
+            activitySelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+        fetch(`{% url 'sitemanage:ajax_load_activities' %}?project_id=${projectId}`)
+            .then(response => response.text())
+            .then(html => {
+                activitySelect.innerHTML = html;
+                if (selectedActivityId) {
+                    activitySelect.value = selectedActivityId;
+                }
+            });
+    }
+
+    projectSelect.addEventListener("change", function () {
+        loadActivities(this.value);
+    });
+
+    // On edit: preselect project & activity
+    {% if form.instance.pk and form.instance.project %}
+        loadActivities(
+            "{{ form.instance.project.id }}",
+            "{{ form.instance.activity.id|default:'' }}"
+        );
+    {% endif %}
+});
+</script>
+
+{% endblock %}

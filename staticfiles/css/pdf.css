@@ -1,0 +1,106 @@
+/* General page setup */
+body {
+    font-family: 'Helvetica', Arial, sans-serif;
+    font-size: 12px;
+    color: #1F2937; /* gray-800 */
+    margin: 20px;
+}
+
+/* Headings */
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Card style (projects) */
+.project-card {
+    border: 1px solid #E5E7EB; /* gray-200 */
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+}
+
+/* Activities list */
+.activities-list li {
+    padding: 5px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+}
+
+/* Status colors */
+.status-completed {
+    background-color: #D1FAE5; /* green-100 */
+    color: #065F46; /* green-800 */
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.status-inprogress {
+    background-color: #FEF3C7; /* yellow-100 */
+    color: #78350F; /* yellow-800 */
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.status-delayed {
+    background-color: #FECACA; /* red-100 */
+    color: #991B1B; /* red-800 */
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+/* Visitors */
+.visitors-list li {
+    margin-bottom: 4px;
+}
+
+/* Images grid */
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.images-grid img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Small text */
+.text-sm {
+    font-size: 10px;
+    color: #6B7280; /* gray-500 */
+}
+
+/* Tables (if needed) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table th, table td {
+    border: 1px solid #D1D5DB; /* gray-300 */
+    padding: 5px;
+    text-align: left;
+}
+

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Delete Contractor Type{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-lg">
+  <h2 class="text-xl font-semibold mb-4">Delete Contractor Type</h2>
+
+  <form method="post" class="bg-white shadow rounded p-6">
+    {% csrf_token %}
+    <p class="mb-4">Are you sure you want to delete <strong>{{ contractor_type.name }}</strong>?</p>
+
+    <div class="flex gap-3">
+      {% if perms.setup.delete_contractortype %}
+      <button class="bg-red-600 text-white px-4 py-2 rounded">Yes, Delete</button>
+      {% endif %}
+      <a href="{% url 'setup:contractor_type_list' %}" class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

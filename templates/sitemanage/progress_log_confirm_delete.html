@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Delete Progress Log{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-lg">
+  <h2 class="text-xl font-semibold mb-4">Delete Progress Log</h2>
+
+  <form method="post" class="bg-white shadow rounded p-6">
+    {% csrf_token %}
+
+    <p class="mb-4">
+      Are you sure you want to delete progress
+      <strong>{{ log.progress_percent }}%</strong>
+      for activity <strong>{{ log.activity.name }}</strong>?
+    </p>
+
+    <div class="flex gap-3">
+      <button type="submit"
+              class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        Yes, Delete
+      </button>
+
+      <a href="{% url 'sitemanage:progress_log_list' log.activity.id %}"
+         class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

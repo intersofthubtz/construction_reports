@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Project Reports{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <h1 class="text-2xl font-bold mb-6">Project Reports</h1>
+
+  {% if perms.reports.view_projectreport %}
+
+  <!-- ================= MESSAGES ================= -->
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="p-3 mb-2 rounded bg-red-100 text-red-800">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- ================= FILTER FORM ================= -->
+  <form method="get" class="bg-white p-6 rounded shadow space-y-4 mb-6">
+
+    <!-- Project Select -->
+    <div>
+      <label class="block font-medium mb-1 text-gray-700">Project</label>
+      <select name="project"
+              class="w-full border-2 border-gray-400 rounded px-3 py-2
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500">
+        <option value="">-- Select Project --</option>
+        {% for p in projects %}
+          <option value="{{ p.id }}"
+            {% if filter_project == p.id|stringformat:"s" %}selected{% endif %}>
+            {{ p.project_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ================= ACTION BUTTONS ================= -->
+    <div class="flex gap-4 flex-wrap mt-2">
+
+      <button type="submit"
+              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Filter
+      </button>
+
+      <a href="{% url 'reports:project_report' %}"
+         class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+        Clear
+      </a>
+
+      {% if is_filtered and filter_project %}
+        <a href="#"
+           target=""
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Excel
+        </a>
+
+        <a href="{% url 'reports:project_report_download_pdf' %}?project={{ filter_project }}"
+           target="_blank"
+           class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+          PDF
+        </a>
+
+        <a href="#"
+           target=""
+           class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+          Word
+        </a>
+      {% else %}
+        <span class="px-4 py-2 border rounded text-gray-500">
+          Select a project and filter to enable download
+        </span>
+      {% endif %}
+    </div>
+
+  </form>
+
+  <!-- ================= PROJECT RESULTS ================= -->
+  {% if is_filtered %}
+
+    {% for project in project_list %}
+    <div class="bg-white rounded shadow mb-8 p-6">
+
+      <!-- ===== BASIC INFO ===== -->
+      <h2 class="text-xl font-semibold mb-4 text-blue-700">
+        {{ project.project_name }} ({{ project.project_code }})
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-6">
+        <div><strong>Client:</strong> {{ project.client.name }}</div>
+        <div><strong>Location:</strong> {{ project.location }}</div>
+        <div><strong>Contract Sum:</strong> {{ project.contract_sum|floatformat:2 }}</div>
+
+        <div><strong>Duration:</strong> {{ project.contract_duration_months }} months</div>
+        <div><strong>Commencement:</strong> {{ project.commencement_date|date:"M d, Y" }}</div>
+        <div><strong>Completion:</strong> {{ project.practical_completion_date|date:"M d, Y" }}</div>
+
+        <div><strong>Delay Status:</strong> {{ project.delay_status }}</div>
+        <div><strong>Defects Period:</strong> {{ project.defects_liability_period_days }} days</div>
+      </div>
+
+      <!-- ===== PARTICIPANTS ===== -->
+      <h3 class="text-lg font-semibold mt-4 mb-2">Project Participants</h3>
+      <div class="overflow-x-auto mb-6">
+        <table class="w-full border text-sm">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-4 border">User</th>
+              <th class="p-4 border">Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for part in project.participants.all %}
+              {% if part.is_active %}
+              <tr>
+                <td class="p-2 border">
+                  {{ part.user.get_full_name|default:part.user.username }}
+                </td>
+                <td class="p-2 border">{{ part.project_role.name }}</td>
+              </tr>
+              {% endif %}
+            {% empty %}
+              <tr>
+                <td colspan="3" class="p-2 text-center text-gray-500">
+                  No participants assigned.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== CONTRACTORS ===== -->
+      <h3 class="text-lg font-semibold mt-4 mb-2">Project Contractors</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full border text-sm">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-2 border">Contractor Name</th>
+              <th class="p-2 border">Contractor Type</th>
+              <th class="p-2 border">Work Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for contractor in project.contractors.all %}
+              {% if contractor.is_active %}
+              <tr>
+                <td class="p-2 border">{{ contractor.contractor.name }}</td>
+                <td class="p-2 border">
+                  {{ contractor.contractor.contractor_type.name }}
+                </td>
+                <td class="p-2 border">{{ contractor.work_description }}</td>
+              </tr>
+              {% endif %}
+            {% empty %}
+              <tr>
+                <td colspan="3" class="p-2 text-center text-gray-500">
+                  No contractors assigned.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+    {% empty %}
+      <p class="text-center text-gray-500">
+        No projects found for selected filters.
+      </p>
+    {% endfor %}
+
+  {% else %}
+    <p class="text-center text-gray-400 mt-8">
+      Please select a project and click <strong>Filter</strong> to view report details.
+    </p>
+  {% endif %}
+
+  {% else %}
+    <p class="text-red-600 font-semibold">
+      You do not have permission to view this report.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block title %}{{ project_form.instance.pk|default:"New Project" }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- =================Error Messages ================= -->
+  {% if messages %}
+    <div class="mb-6 space-y-2">
+      {% for message in messages %}
+        <div class="
+          px-4 py-3 rounded text-sm font-semibold
+          {% if message.tags == 'success' %}
+            bg-green-100 text-green-800 border border-green-300
+          {% elif message.tags == 'error' %}
+            bg-red-100 text-red-800 border border-red-300
+          {% else %}
+            bg-gray-100 text-gray-800 border border-gray-300
+          {% endif %}
+        ">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'projects:project_list' %}"
+       class="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold">
+      ← Back to Projects
+    </a>
+    <h2 class="text-2xl font-semibold">
+      {% if project_form.instance.pk %}Edit Project{% else %}Create Project{% endif %}
+    </h2>
+  </div>
+
+  <form method="post" enctype="multipart/form-data"
+        class="space-y-6 bg-white rounded shadow p-6">
+    {% csrf_token %}
+
+    <!-- ================= Basic Information ================= -->
+    <div class="border p-4 rounded bg-gray-50">
+      <h3 class="font-semibold text-lg mb-4">Basic Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for field in project_form %}
+        <div>
+          <label class="block font-medium mb-1">
+            {{ field.label }}
+            {% if field.field.required %}
+              <span class="text-red-500">*</span>
+            {% endif %}
+          </label>
+          {{ field }}
+          {% for error in field.errors %}
+            <p class="text-red-500 text-sm">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ================= Contractors ================= -->
+    <div class="border p-4 rounded bg-gray-50" x-data="contractorFormset()">
+      <h3 class="font-semibold text-lg mb-4 flex justify-between">
+        Contractors
+        <button type="button"
+                class="bg-green-600 text-white px-2 py-1 rounded text-sm"
+                @click="addForm()">
+          + Add
+        </button>
+      </h3>
+
+      {{ contractor_formset.management_form }}
+
+      {% for form in contractor_formset %}
+      <div class="border p-4 rounded mb-2 bg-white flex gap-2 items-end">
+        {{ form.id }}  {# hidden id field for existing instance #}
+        <div class="flex-1">
+          <label class="block font-medium mb-1">Contractor</label>
+          {{ form.contractor }}
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium mb-1">Work Description</label>
+          {{ form.work_description }}
+        </div>
+        <div class="hidden">{{ form.DELETE }}</div>
+        <button type="button"
+                class="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                @click="removeForm($event)">
+          Remove
+        </button>
+      </div>
+      {% endfor %}
+
+      <!-- Dynamic Forms -->
+      <template x-for="form in forms" :key="form">
+        <div x-html="form"></div>
+      </template>
+
+      <!-- Empty Template -->
+      <template x-ref="emptyForm">
+        <div class="border p-4 rounded mb-2 bg-white flex gap-2 items-end">
+          <div class="flex-1">
+            <label class="block font-medium mb-1">Contractor</label>
+            {{ contractor_formset.empty_form.contractor }}
+          </div>
+          <div class="flex-1">
+            <label class="block font-medium mb-1">Work Description</label>
+            {{ contractor_formset.empty_form.work_description }}
+          </div>
+          <div class="hidden">{{ contractor_formset.empty_form.DELETE }}</div>
+          <button type="button"
+                  class="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                  @click="removeForm($event)">
+            Remove
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <!-- ================= Participants ================= -->
+    <div class="border p-4 rounded bg-gray-50" x-data="participantFormset()">
+      <h3 class="font-semibold text-lg mb-4 flex justify-between">
+        Participants
+        <button type="button"
+                class="bg-green-600 text-white px-2 py-1 rounded text-sm"
+                @click="addForm()">
+          + Add
+        </button>
+      </h3>
+
+      {{ participant_formset.management_form }}
+
+      {% for form in participant_formset %}
+      <div class="border p-4 rounded mb-2 bg-white flex gap-2 items-end">
+        {{ form.id }}  {# hidden id field for existing instance #}
+        <div class="flex-1">
+          <label class="block font-medium mb-1">User</label>
+          {{ form.user }}
+        </div>
+        <div class="flex-1">
+          <label class="block font-medium mb-1">Role</label>
+          {{ form.project_role }}
+        </div>
+        <div class="hidden">{{ form.DELETE }}</div>
+        <button type="button"
+                class="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                @click="removeForm($event)">
+          Remove
+        </button>
+      </div>
+      {% endfor %}
+
+      <!-- Dynamic Forms -->
+      <template x-for="form in forms" :key="form">
+        <div x-html="form"></div>
+      </template>
+
+      <!-- Empty Template -->
+      <template x-ref="emptyForm">
+        <div class="border p-4 rounded mb-2 bg-white flex gap-2 items-end">
+          <div class="flex-1">
+            <label class="block font-medium mb-1">User</label>
+            {{ participant_formset.empty_form.user }}
+          </div>
+          <div class="flex-1">
+            <label class="block font-medium mb-1">Role</label>
+            {{ participant_formset.empty_form.project_role }}
+          </div>
+          <div class="hidden">{{ participant_formset.empty_form.DELETE }}</div>
+          <button type="button"
+                  class="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                  @click="removeForm($event)">
+            Remove
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <!-- ================= Project Document ================= -->
+    <div class="border p-4 rounded bg-gray-50">
+      <h3 class="font-semibold text-lg mb-4">Project Document</h3>
+
+      {% if existing_doc %}
+        <div class="mb-2">
+          <p class="text-sm font-medium">Current Document:</p>
+          <a href="{{ existing_doc.document.url }}" target="_blank"
+             class="text-blue-600 hover:underline">
+            📄 {{ existing_doc.title }} (View PDF)
+          </a>
+        </div>
+      {% endif %}
+
+      {% for field in document_form %}
+        <div class="mb-2">
+          <label class="block font-medium mb-1">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}
+            <p class="text-red-500 text-sm">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <p class="text-sm text-gray-500">Only PDF files allowed. Max size: 10MB.</p>
+    </div>
+
+    <!-- ================= Buttons ================= -->
+    <div class="flex gap-3">
+      <button type="submit" 
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Save
+      </button>
+      <a href="{% url 'projects:project_list' %}"
+         class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<!-- ================= Alpine JS ================= -->
+<script>
+function contractorFormset() {
+  return {
+    forms: [],
+    total: {{ contractor_formset.total_form_count }},
+    addForm() {
+      let html = this.$refs.emptyForm.innerHTML.replace(/__prefix__/g, this.total);
+      this.forms.push(html);
+      this.total++;
+      document.querySelector('[name="{{ contractor_formset.prefix }}-TOTAL_FORMS"]').value = this.total;
+    },
+    removeForm(e) {
+      const box = e.target.closest('.border');
+      const del = box.querySelector('input[type=checkbox]');
+      if (del) del.checked = true;
+      box.style.display = 'none';
+    }
+  }
+}
+
+function participantFormset() {
+  return {
+    forms: [],
+    total: {{ participant_formset.total_form_count }},
+    addForm() {
+      let html = this.$refs.emptyForm.innerHTML.replace(/__prefix__/g, this.total);
+      this.forms.push(html);
+      this.total++;
+      document.querySelector('[name="{{ participant_formset.prefix }}-TOTAL_FORMS"]').value = this.total;
+    },
+    removeForm(e) {
+      const box = e.target.closest('.border');
+      const del = box.querySelector('input[type=checkbox]');
+      if (del) del.checked = true;
+      box.style.display = 'none';
+    }
+  }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Resources Report{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <h1 class="text-2xl font-bold mb-6 text-gray-800">Resources Report</h1>
+
+  {% if perms.reports.view_resourcesreport %}
+
+  <!-- ================= FILTER FORM ================= -->
+  <form method="get" class="bg-white p-6 rounded shadow space-y-4 mb-6">
+
+    <!-- Project -->
+    <div>
+      <label class="block font-medium mb-1 text-gray-700">Project</label>
+      <select name="project"
+              class="w-full border-2 border-gray-400 rounded px-3 py-2
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500">
+        <option value="">-- Select Project --</option>
+        {% for project in projects %}
+          <option value="{{ project.id }}" {% if filter_project == project.id|stringformat:"s" %}selected{% endif %}>
+            {{ project.project_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- From / To Date -->
+    <div class="flex gap-4 flex-wrap">
+      <div class="flex-1">
+        <label class="block font-medium mb-1 text-gray-700">From Date</label>
+        <input type="date" name="from_date" value="{{ filter_from }}"
+               class="w-full border-2 border-gray-400 rounded px-3 py-2
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                      focus:border-blue-500">
+      </div>
+      <div class="flex-1">
+        <label class="block font-medium mb-1 text-gray-700">To Date</label>
+        <input type="date" name="to_date" value="{{ filter_to }}"
+               class="w-full border-2 border-gray-400 rounded px-3 py-2
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                      focus:border-blue-500">
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="flex gap-3 flex-wrap mt-2">
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+        Filter
+      </button>
+
+      <a href="{% url 'reports:resources_report' %}" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+        Clear
+      </a>
+
+      {% if is_filtered %}
+        <a href="{% url 'reports:resources_report_download_excel' %}?project={{ filter_project }}&from_date={{ filter_from }}&to_date={{ filter_to }}"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" target="_blank">
+          CSV
+        </a>
+
+        <a href="{% url 'reports:resources_report_download_pdf' %}?project={{ filter_project }}&from_date={{ filter_from }}&to_date={{ filter_to }}"
+           class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition" target="_blank">
+          PDF
+        </a>
+
+        <a href="{% url 'reports:resources_report_download_word' %}?project={{ filter_project }}&from_date={{ filter_from }}&to_date={{ filter_to }}"
+           class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition" target="_blank">
+          Word
+        </a>
+      {% else %}
+        <span class="px-4 py-2 border rounded text-gray-500">
+          Select filters to enable downloads
+        </span>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- ================= RESULTS ================= -->
+  {% if is_filtered %}
+
+  <!-- EQUIPMENT -->
+  <div class="bg-white shadow rounded border border-gray-200 p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-blue-700">Equipment</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full border text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 border">Project</th>
+            <th class="p-3 border">Name</th>
+            <th class="p-3 border">Category</th>
+            <th class="p-3 border">Qty</th>
+            <th class="p-3 border">Condition</th>
+            <th class="p-3 border">Delivery</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in equipment %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-2 border">{{ e.project.project_name }}</td>
+            <td class="p-2 border">{{ e.name }}</td>
+            <td class="p-2 border">{{ e.category }}</td>
+            <td class="p-2 border">{{ e.quantity }}</td>
+            <td class="p-2 border">{{ e.condition|title }}</td>
+            <td class="p-2 border">{{ e.delivery_date|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="p-3 text-center text-gray-500">No equipment found</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MANPOWER -->
+  <div class="bg-white shadow rounded border border-gray-200 p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-blue-700">Manpower</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full border text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 border">Project</th>
+            <th class="p-3 border">Role</th>
+            <th class="p-3 border">Count</th>
+            <th class="p-3 border">Start Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in manpower %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-2 border">{{ m.project.project_name }}</td>
+            <td class="p-2 border">{{ m.role }}</td>
+            <td class="p-2 border">{{ m.count }}</td>
+            <td class="p-2 border">{{ m.start_date|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="p-3 text-center text-gray-500">No manpower found</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+    <div class="mt-12 text-center text-gray-400">
+      <p class="text-gray-500 text-lg mt-8">
+        Please select a project or date range and click <strong class="text-gray-700">Filter</strong>.
+      </p>
+    </div>
+  {% endif %}
+
+  {% else %}
+    <p class="text-red-600 font-semibold">
+      You do not have permission to view this report.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

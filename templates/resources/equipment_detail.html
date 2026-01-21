@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-6 max-w-3xl mx-auto">
+  <div class="flex justify-between mb-4">
+    <h2 class="text-xl font-semibold">{{ equipment.name }}</h2>
+
+    <div class="space-x-2">
+      {% if perms.resources.change_equipment %}
+        <a href="{% url 'resources:equipment_update' equipment.id %}" class="btn btn-secondary">Edit</a>
+      {% endif %}
+      {% if perms.resources.delete_equipment %}
+        <a href="{% url 'resources:equipment_delete' equipment.id %}" class="btn btn-danger">Delete</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded shadow space-y-2">
+    <p><strong>Project:</strong> {{ equipment.project.name }}</p>
+    <p><strong>Category:</strong> {{ equipment.category }}</p>
+    <p><strong>Quantity:</strong> {{ equipment.quantity }}</p>
+    <p><strong>Condition:</strong> {{ equipment.get_condition_display }}</p>
+    <p><strong>Delivered:</strong> {{ equipment.delivery_date }}</p>
+  </div>
+</div>
+{% endblock %}

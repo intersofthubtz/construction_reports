@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Material Tests{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+      <div class="px-4 py-2 rounded text-sm font-semibold
+        {% if message.tags == 'success' %}
+          bg-green-100 text-green-700
+        {% elif message.tags == 'error' %}
+          bg-red-100 text-red-700
+        {% else %}
+          bg-blue-100 text-blue-700
+        {% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h2 class="text-2xl font-bold text-gray-800">Material Tests</h2>
+
+    {% if perms.quality.add_materialtest %}
+    <a href="{% url 'quality:material_add' %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-semibold">
+      + Add Test
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex gap-3 mb-4 items-center">
+    <input type="text"
+           id="searchInput"
+           name="q"
+           value="{{ search|default:'' }}"
+           placeholder="Search project, material, consultant..."
+           class="px-4 py-2 border rounded w-full sm:w-80">
+
+    {% if search %}
+    <a href="{% url 'quality:material_list' %}"
+       class="px-4 py-2 border rounded text-sm text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="bg-white shadow overflow-x-auto rounded">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr class="text-xs uppercase text-gray-600">
+          <th class="p-4 text-left">Project</th>
+          <th class="p-4 text-left">Material</th>
+          <th class="p-4 text-left">Test Date</th>
+          <th class="p-4 text-left">Result</th>
+          <th class="p-4 text-left">Consultant</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        {% for m in materials %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="p-4 font-semibold">{{ m.project.project_name|capfirst }}</td>
+          <td class="p-4">{{ m.material_type }}</td>
+          <td class="p-4">{{ m.test_date }}</td>
+          <td class="p-4">
+            <span class="px-2 py-1 text-xs rounded font-semibold
+              {% if m.result == 'Pass' %}
+                bg-green-100 text-green-700
+              {% else %}
+                bg-red-100 text-red-700
+              {% endif %}">
+              {{ m.result }}
+            </span>
+          </td>
+          <td class="p-4">{{ m.consultant }}</td>
+
+          <td class="p-4 flex justify-end gap-2">
+            {% if perms.quality.view_materialtest %}
+            <a href="{% url 'quality:material_report' m.pk %}" target="_blank"
+               class="px-3 py-1 bg-indigo-500 text-white rounded text-xs hover:bg-indigo-600">
+              View
+            </a>
+            {% endif %}
+
+            {% if perms.quality.change_materialtest %}
+            <a href="{% url 'quality:material_edit' m.pk %}"
+               class="px-3 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600">
+              Edit
+            </a>
+            {% endif %}
+
+            {% if perms.quality.delete_materialtest %}
+            <a href="{% url 'quality:material_delete' m.pk %}"
+               class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">
+              Delete
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-6 text-center text-gray-500">
+            No material tests found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% include "partials/pagination.html" with page_obj=materials search=search %}
+</div>
+
+<!-- Debounced search -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500);
+  });
+</script>
+
+{% endblock %}

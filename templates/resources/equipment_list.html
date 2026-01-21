@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Equipment & Materials{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- ================= Messages ================= -->
+  {% if messages %}
+    <div class="space-y-2 mb-6">
+      {% for message in messages %}
+        <div class="px-4 py-3 rounded text-sm font-semibold
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-300
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-300
+                    {% else %}bg-gray-100 text-gray-800 border border-gray-300{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+    <h2 class="text-2xl font-bold text-gray-800">Equipment & Materials</h2>
+
+    {% if perms.resources.add_equipment %}
+    <a href="{% url 'resources:equipment_create' %}"
+       class="px-4 py-2 rounded shadow bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">
+      + Add Equipment
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex flex-wrap gap-3 items-center mb-4">
+    <input type="text" name="q" value="{{ search|default:'' }}"
+           placeholder="Search by name, project, or category..."
+           id="searchInput"
+           class="px-4 py-2 border rounded text-sm w-full sm:w-80" />
+    {% if search %}
+    <a href="{% url 'resources:equipment_list' %}"
+       class="px-4 py-2 rounded border text-sm text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Equipment Table -->
+  <div class="overflow-x-auto bg-white shadow rounded">
+    <table class="w-full text-sm min-w-max divide-y divide-gray-100">
+      <thead class="bg-gray-100 uppercase text-gray-700 text-xs sm:text-sm">
+        <tr>
+          <th class="p-3 text-left">Name</th>
+          <th class="p-3 text-left">Project</th>
+          <th class="p-3 text-left">Category</th>
+          <th class="p-3 text-center">Qty</th>
+          <th class="p-3 text-left">Condition</th>
+          <th class="p-3 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if equipment %}
+          {% for e in equipment %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-3 font-medium">{{ e.name|capfirst }}</td>
+            <td class="p-3">{{ e.project.project_name|capfirst }}</td>
+            <td class="p-3">{{ e.category|capfirst }}</td>
+            <td class="p-3 text-center">{{ e.quantity }}</td>
+            <td class="p-3">{{ e.get_condition_display|capfirst }}</td>
+            <td class="p-3 text-center flex justify-center gap-2 flex-wrap">
+              {% if perms.resources.change_equipment %}
+              <a href="{% url 'resources:equipment_edit' e.pk %}"
+                 class="px-2 py-1 text-xs bg-yellow-500 hover:bg-yellow-600 text-white rounded">
+                Edit
+              </a>
+              {% endif %}
+              {% if perms.resources.delete_equipment %}
+              <a href="{% url 'resources:equipment_delete' e.pk %}"
+                 class="px-3 py-1 text-xs sm:text-sm bg-red-500 hover:bg-red-600 text-white rounded shadow">
+                Delete
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="p-6 text-center text-gray-500">
+              No equipment records found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if equipment %}
+    {% include "partials/pagination.html" with page_obj=equipment search=search %}
+  {% endif %}
+
+</div>
+
+<!-- Debounce search JS -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500); // 500ms debounce
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,102 @@
+<div class="bg-white rounded-lg shadow p-5">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h3 class="text-sm text-gray-500">Projects Overview</h3>
+      <p class="text-xs text-gray-400">Activity progress per project</p>
+    </div>
+    <p class="text-2xl font-bold">{{ total_projects }}</p>
+  </div>
+
+  {% if projects_overview %}
+    <div class="space-y-4 max-h-[420px] overflow-y-auto pr-2">
+      {% for project in projects_overview %}
+        <div class="border rounded-lg p-4">
+          <div class="flex justify-between items-center mb-2">
+            <p class="font-semibold text-gray-800">{{ project.name }}</p>
+            <span class="text-xs text-gray-500">{{ project.total_activities }} activities</span>
+          </div>
+
+          <!-- Progress Bars -->
+          <div class="space-y-2 text-xs mb-2">
+            <div>
+              <div class="flex justify-between">
+                <span class="text-green-600">Completed</span>
+                <span>{{ project.completed }}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded h-2">
+                <div class="bg-green-600 h-2 rounded" style="width: {{ project.completed_pct }}%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between">
+                <span class="text-yellow-600">In Progress</span>
+                <span>{{ project.in_progress }}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded h-2">
+                <div class="bg-yellow-500 h-2 rounded" style="width: {{ project.in_progress_pct }}%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between">
+                <span class="text-red-600">Delayed</span>
+                <span>{{ project.delayed }}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded h-2">
+                <div class="bg-red-600 h-2 rounded" style="width: {{ project.delayed_pct }}%"></div>
+              </div>
+            </div>
+
+            {% if project.pending > 0 %}
+            <div>
+              <div class="flex justify-between">
+                <span class="text-blue-600">Pending</span>
+                <span>{{ project.pending }}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded h-2">
+                <div class="bg-blue-600 h-2 rounded" style="width: {{ project.pending_pct }}%"></div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Collapsible Activity Details -->
+          <button type="button"
+                  onclick="document.getElementById('activities-{{ project.id }}').classList.toggle('hidden')"
+                  class="text-blue-600 hover:underline text-sm mb-2">
+            Show/Hide Activities
+          </button>
+          <div id="activities-{{ project.id }}" class="hidden space-y-1 text-xs">
+            {% for act in project.activities %}
+              <div class="flex justify-between border-b py-1 px-2 rounded hover:bg-gray-50">
+                <span>{{ act.name }}</span>
+                <span class="font-semibold">
+                  {% if act.status == "Completed" %}
+                    <span class="text-green-600">{{ act.status }}</span>
+                  {% elif act.status == "In Progress" %}
+                    <span class="text-yellow-600">{{ act.status }}</span>
+                  {% elif act.status == "Delayed" %}
+                    <span class="text-red-600">{{ act.status }}</span>
+                  {% elif act.status == "Pending" %}
+                    <span class="text-blue-600">{{ act.status }}</span>
+                  {% else %}
+                    <span class="text-gray-500">{{ act.status }}</span>
+                  {% endif %}
+                </span>
+              </div>
+            {% empty %}
+              <p class="text-gray-400 text-xs">No activities available.</p>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-500">No active projects available.</p>
+  {% endif %}
+
+  <a href="{% url 'projects:project_list' %}" class="inline-block text-blue-600 hover:underline text-sm mt-4">
+    View all projects
+  </a>
+</div>

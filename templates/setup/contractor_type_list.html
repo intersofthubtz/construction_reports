@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Contractor Types{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="space-y-2 mb-4">
+    {% for message in messages %}
+      <div class="p-3 rounded text-sm font-medium
+        {% if 'success' in message.tags %}bg-green-100 text-green-800
+        {% elif 'error' in message.tags %}bg-red-100 text-red-800
+        {% elif 'warning' in message.tags %}bg-yellow-100 text-yellow-800
+        {% else %}bg-blue-100 text-blue-800{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h2 class="text-2xl font-bold text-gray-800">Contractor Types</h2>
+
+    {% if perms.setup.add_contractortype %}
+    <a href="{% url 'setup:contractor_type_create' %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+      + Add Contractor Type
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex flex-wrap gap-3 items-center mb-4">
+    <input
+      type="text"
+      id="searchInput"
+      name="q"
+      value="{{ search|default:'' }}"
+      placeholder="Search by name or description..."
+      class="px-4 py-2 border rounded text-sm w-full sm:w-80"
+    />
+
+    {% if search %}
+    <a href="{% url 'setup:contractor_type_list' %}"
+       class="px-4 py-2 rounded border text-sm text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="bg-white shadow overflow-x-auto rounded">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr class="text-gray-600 uppercase text-xs tracking-wide">
+          <th class="p-4 text-left">Name</th>
+          <th class="p-4 text-left">Description</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        {% for type in types %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="p-4 font-semibold capitalize">{{ type.name }}</td>
+          <td class="p-4">{{ type.description|default:"—" }}</td>
+          <td class="p-4 text-right flex justify-end gap-2">
+            {% if perms.setup.change_contractortype %}
+            <a href="{% url 'setup:contractor_type_edit' type.id %}"
+               class="px-3 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-xs font-semibold">
+              Edit
+            </a>
+            {% endif %}
+            {% if perms.setup.delete_contractortype %}
+            <a href="{% url 'setup:contractor_type_delete' type.id %}"
+               class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs font-semibold">
+              Delete
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="p-6 text-center text-gray-500">
+            No contractor types found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% include "partials/pagination.html" with page_obj=types search=search %}
+
+</div>
+
+<!-- Debounced Search -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500);
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Quality Reports{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <h1 class="text-2xl font-bold mb-6 text-gray-800">Quality Reports</h1>
+
+  {% if perms.reports.view_qualityreport %}
+
+  <!-- ================= FILTER FORM ================= -->
+  <form method="get" class="bg-white p-6 rounded shadow space-y-4 mb-6">
+
+    <!-- Project -->
+    <div>
+      <label class="block font-medium mb-1 text-gray-700">Project</label>
+      <select name="project"
+              class="w-full border-2 border-gray-400 rounded px-3 py-2
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500">
+        <option value="">-- Select Project --</option>
+        {% for project in projects %}
+          <option value="{{ project.id }}" {% if filter_project == project.id|stringformat:"s" %}selected{% endif %}>
+            {{ project.project_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- From / To Date -->
+    <div class="flex gap-4 flex-wrap">
+      <div class="flex-1">
+        <label class="block font-medium mb-1 text-gray-700">From Date</label>
+        <input type="date" name="from_date" value="{{ filter_from }}"
+               class="w-full border-2 border-gray-400 rounded px-3 py-2
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                      focus:border-blue-500">
+      </div>
+      <div class="flex-1">
+        <label class="block font-medium mb-1 text-gray-700">To Date</label>
+        <input type="date" name="to_date" value="{{ filter_to }}"
+               class="w-full border-2 border-gray-400 rounded px-3 py-2
+                      focus:outline-none focus:ring-2 focus:ring-blue-500
+                      focus:border-blue-500">
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="flex gap-3 flex-wrap mt-2">
+      <button type="submit"
+              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+        Filter
+      </button>
+
+      <a href="{% url 'reports:quality_report' %}"
+         class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+        Clear
+      </a>
+
+      {% if is_filtered %}
+        <a href="#"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" target="_blank">
+          CSV
+        </a>
+
+        <a href="{% url 'reports:quality_report_download_pdf' %}?project={{ filter_project }}&from_date={{ filter_from }}&to_date={{ filter_to }}"
+           class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition" target="_blank">
+          PDF
+        </a>
+
+        <a href="{% url 'reports:quality_report_download_word' %}?project={{ filter_project }}&from_date={{ filter_from }}&to_date={{ filter_to }}"
+           class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition" target="_blank">
+          Word
+        </a>
+      {% else %}
+        <span class="px-4 py-2 border rounded text-gray-500">
+          Apply filters to enable downloads
+        </span>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if is_filtered %}
+
+  <!-- ================= MATERIAL TESTS ================= -->
+  <div class="bg-white shadow rounded border border-gray-200 p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-blue-700">Material Tests</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full border text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 border">Project</th>
+            <th class="p-3 border">Material</th>
+            <th class="p-3 border">Test Date</th>
+            <th class="p-3 border">Result</th>
+            <th class="p-3 border">Consultant</th>
+            <th class="p-3 border">Attachment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for test in material_tests %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-2 border">{{ test.project.project_name }}</td>
+            <td class="p-2 border">{{ test.material_type }}</td>
+            <td class="p-2 border">{{ test.test_date|date:"M d, Y" }}</td>
+            <td class="p-2 border">{{ test.result }}</td>
+            <td class="p-2 border">{{ test.consultant }}</td>
+            <td class="p-2 border">
+              {% if test.report_file %}
+                <a href="{{ test.report_file.url }}" target="_blank" class="text-blue-600 underline">View</a>
+              {% else %}-{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="p-3 text-center text-gray-500">No material tests found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= WORK APPROVALS ================= -->
+  <div class="bg-white shadow rounded border border-gray-200 p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-blue-700">Work Approvals</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full border text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 border">Project</th>
+            <th class="p-3 border">Activity</th>
+            <th class="p-3 border">Approved By</th>
+            <th class="p-3 border">Approval Date</th>
+            <th class="p-3 border">Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in work_approvals %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-2 border">{{ a.activity.project.project_name }}</td>
+            <td class="p-2 border">{{ a.activity.name }}</td>
+            <td class="p-2 border">{{ a.approved_by.username|default:"-" }}</td>
+            <td class="p-2 border">{{ a.approval_date|date:"M d, Y" }}</td>
+            <td class="p-2 border">{{ a.remarks|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="p-3 text-center text-gray-500">No work approvals found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= COMPLIANCE ================= -->
+  <div class="bg-white shadow rounded border border-gray-200 p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4 text-blue-700">Compliance</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full border text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-3 border">Project</th>
+            <th class="p-3 border">Authority</th>
+            <th class="p-3 border">Registration No</th>
+            <th class="p-3 border">Status</th>
+            <th class="p-3 border">Expiry Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in compliances %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-2 border">{{ c.project.project_name }}</td>
+            <td class="p-2 border">{{ c.authority.name }}</td>
+            <td class="p-2 border">{{ c.registration_no }}</td>
+            <td class="p-2 border">{{ c.status }}</td>
+            <td class="p-2 border">{{ c.expiry_date|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="p-3 text-center text-gray-500">No compliance records found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+    <div class="mt-12 text-center text-gray-400">
+      <p class="text-gray-500 text-lg mt-8">
+        Please select a project or date range and click <strong class="text-gray-700">Filter</strong>.
+      </p>
+    </div>
+  {% endif %}
+
+  {% else %}
+    <p class="text-red-600 font-semibold">
+      You do not have permission to view this report.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

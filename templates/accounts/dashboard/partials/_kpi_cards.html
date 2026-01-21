@@ -1,0 +1,6 @@
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+  {% include "accounts/dashboard/partials/kpi_card.html" with label="Projects" value=total_projects %}
+  {% include "accounts/dashboard/partials/kpi_card.html" with label="Activities" value=total_activities %}
+  {% include "accounts/dashboard/partials/kpi_card.html" with label="Visitors" value=total_visitors %}
+  {% include "accounts/dashboard/partials/kpi_card.html" with label="Completion Rate" value=completion_rate suffix="%" %}
+</div>

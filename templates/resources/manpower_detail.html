@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-6 max-w-3xl mx-auto">
+  <div class="flex justify-between mb-4">
+    <h2 class="text-xl font-semibold">{{ manpower.role }}</h2>
+
+    <div class="space-x-2">
+      {% if perms.resources.change_manpower %}
+        <a href="{% url 'resources:manpower_update' manpower.id %}" class="btn btn-secondary">Edit</a>
+      {% endif %}
+      {% if perms.resources.delete_manpower %}
+        <a href="{% url 'resources:manpower_delete' manpower.id %}" class="btn btn-danger">Delete</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded shadow space-y-2">
+    <p><strong>Project:</strong> {{ manpower.project.name }}</p>
+    <p><strong>Role:</strong> {{ manpower.role }}</p>
+    <p><strong>Count:</strong> {{ manpower.count }}</p>
+    <p><strong>Month:</strong> {{ manpower.start_date }}</p>
+  </div>
+</div>
+{% endblock %}

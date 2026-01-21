@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Work Approval{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-xl">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'quality:work_list' %}"
+       class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold">
+      ← Back to Work Approvals
+    </a>
+    <h2 class="text-2xl font-semibold">
+      {% if approval %}Edit{% else %}Approve{% endif %} Work
+    </h2>
+  </div>
+
+  <!-- Form -->
+  <form method="post"
+        class="bg-white shadow rounded p-6 space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="flex gap-3">
+      <button type="submit"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Save
+      </button>
+
+      <a href="{% url 'quality:work_list' %}"
+         class="px-4 py-2 border rounded bg-red-600 hover:bg-red-700 text-white">
+        Cancel
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

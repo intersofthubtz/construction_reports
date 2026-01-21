@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- ================= Messages ================= -->
+  {% if messages %}
+    <div class="space-y-2 mb-6">
+      {% for message in messages %}
+        <div class="px-4 py-3 rounded text-sm font-semibold
+                    {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-300
+                    {% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-300
+                    {% else %}bg-gray-100 text-gray-800 border border-gray-300{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <h2 class="text-xl font-semibold">Projects</h2>
+    {% if perms.projects.add_project %}
+    <a href="{% url 'projects:project_create' %}"
+       class="px-4 py-2 rounded shadow bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+      + New Project
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex flex-wrap gap-3 items-center mb-4">
+    <input type="text" name="q" value="{{ search|default:'' }}"
+           placeholder="Search by project name or client..."
+           id="searchInput"
+           class="px-4 py-2 border rounded text-sm w-full sm:w-80" />
+    {% if search %}
+    <a href="{% url 'projects:project_list' %}"
+       class="px-4 py-2 rounded border text-sm text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="overflow-x-auto bg-white rounded shadow">
+    <table class="min-w-full text-sm divide-y divide-gray-200">
+      <thead class="bg-gray-50 text-gray-700 uppercase text-xs sm:text-sm">
+        <tr>
+          <th class="p-3 text-left whitespace-nowrap">Project Code</th>
+          <th class="p-3 text-left whitespace-nowrap">Project Name</th>
+          <th class="p-3 text-left whitespace-nowrap">Client</th>
+          <th class="p-3 text-center whitespace-nowrap">Start Date</th>
+          <th class="p-3 text-center whitespace-nowrap">End Date</th>
+          <th class="p-3 text-center whitespace-nowrap">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-100">
+        {% if projects %}
+          {% for project in projects %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-3 font-medium whitespace-nowrap">{{ project.project_code|capfirst }}</td>
+            <td class="p-3 font-medium whitespace-nowrap">{{ project.project_name|capfirst }}</td>
+            <td class="p-3 whitespace-nowrap">{{ project.client|capfirst }}</td>
+            <td class="p-3 text-center whitespace-nowrap">{{ project.commencement_date|date:"M d, Y" }}</td>
+            <td class="p-3 text-center whitespace-nowrap">{{ project.practical_completion_date|date:"M d, Y" }}</td>
+            <td class="p-3 text-center">
+              <div class="flex justify-center gap-1 flex-wrap">
+
+                {% if perms.projects.view_project %}
+                <a href="{% url 'projects:project_detail' project.pk %}"
+                   class="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-green-500 hover:bg-green-600 text-white rounded shadow">
+                  View
+                </a>
+                {% endif %}
+
+                {% if perms.projects.change_project %}
+                <a href="{% url 'projects:project_edit' project.pk %}"
+                   class="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded shadow">
+                  Edit
+                </a>
+                {% endif %}
+
+                {% if perms.projects.delete_project %}
+                <a href="{% url 'projects:project_delete' project.pk %}"
+                   class="px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm bg-red-500 hover:bg-red-600 text-white rounded shadow">
+                  Delete
+                </a>
+                {% endif %}
+
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="p-6 text-center text-gray-500">
+              No projects found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if projects %}
+    {% include "partials/pagination.html" with page_obj=projects search=search %}
+  {% endif %}
+
+</div>
+
+<!-- Debounce search JS -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500); // 500ms debounce
+  });
+</script>
+
+{% endblock %}

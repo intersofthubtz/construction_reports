@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6 flex-wrap">
+    <a href="{% url 'sitemanage:progress_log_list' activity.id %}" 
+       class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold">
+      ← Back to Progress Logs
+    </a>
+    <h2 class="text-2xl font-bold text-gray-800">{{ page_title }}</h2>
+  </div>
+
+  <!-- Form -->
+  <form method="post" class="bg-white p-6 rounded-lg shadow grid gap-6">
+    {% csrf_token %}
+
+    <!-- Non-field errors (model.clean / constraints) -->
+    {% if form.non_field_errors %}
+      <div class="bg-red-100 border border-red-300 text-red-700 text-sm rounded px-4 py-2">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Fields -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block mb-1 font-medium text-gray-700">
+            {{ field.label }}
+          </label>
+          {{ field|add_class:"border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" }}
+          {% if field.help_text %}
+            <p class="text-gray-400 text-xs mt-1">{{ field.help_text }}</p>
+          {% endif %}
+          {% if field.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ field.errors|striptags }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-3 mt-6 flex-wrap">
+      <a href="{% url 'sitemanage:progress_log_list' activity.id %}"
+         class="px-5 py-2 rounded shadow bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">
+        Cancel
+      </a>
+
+      <button type="submit"
+        class="px-5 py-2 rounded shadow bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold">
+        {% if log %}Update Progress{% else %}Add Progress{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

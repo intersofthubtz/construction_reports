@@ -1,0 +1,58 @@
+<!-- Full-width Header -->
+<header
+  class="bg-white shadow px-12 py-4 flex justify-between items-center sticky top-0 z-10"
+>
+  <h1 class="text-xl font-semibold text-gray-800">
+    {% block page_title %}Directorate of Construction{% endblock %}
+  </h1>
+
+  <div class="flex items-center gap-6">
+    <!-- Logged-in info -->
+    <div class="flex items-center gap-2 text-gray-700 text-sm">
+      <!-- Google Material Icon for user -->
+      <span class="material-icons text-gray-500">account_circle</span>
+      Logged in as: {{ request.user.username|capfirst }}
+    </div>
+
+    <!-- Notification Bell -->
+    <div class="relative" x-data="{ open: false }">
+      <button @click="open = !open" class="relative focus:outline-none">
+        <span class="material-icons text-gray-600">notifications</span>
+        <span
+          class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"
+        ></span>
+      </button>
+
+      <div
+        x-show="open"
+        @click.outside="open = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 transform -translate-y-2"
+        x-transition:enter-end="opacity-100 transform translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 transform translate-y-0"
+        x-transition:leave-end="opacity-0 transform -translate-y-2"
+        class="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg z-20"
+      >
+        <div class="p-2 text-sm text-gray-700 font-semibold border-b">
+          Notifications
+        </div>
+        <ul class="divide-y divide-gray-200 max-h-60 overflow-y-auto">
+          <li class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
+            New report submitted
+          </li>
+          <li class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
+            Report approved
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <a
+      href="{% url 'accounts:logout' %}"
+      class="text-sm text-red-600 hover:underline"
+      >Logout</a
+    >
+  </div>
+</header>

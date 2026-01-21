@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}{{ project.project_name|upper }}{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div class="flex items-center gap-3">
+      <a href="{% url 'projects:project_list' %}"
+         class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold">
+        ← Back to Projects
+      </a>
+      <h2 class="text-2xl font-bold uppercase text-gray-800">
+        Project Name: {{ project.project_name }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div x-data="{ tab: 'info' }" class="bg-white rounded shadow">
+    <!-- Tab Buttons -->
+    <div class="flex border-b border-gray-200 bg-gray-50 rounded-t">
+      <template x-for="t in ['info','participants','contractors','documents']" :key="t">
+        <button @click="tab = t"
+                :class="tab === t ? 'border-b-2 border-blue-600 font-bold text-blue-700' : 'border-b-2 border-transparent text-gray-600 hover:text-gray-800'"
+                class="px-4 py-2 transition-all">
+          <span x-text="t==='info' ? 'Basic Info' : t==='participants' ? 'Participants' : t==='contractors' ? 'Contractors' : 'Documents'"></span>
+        </button>
+      </template>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="p-4 space-y-4">
+
+      <!-- ---------------- Basic Info ---------------- -->
+      <div x-show="tab==='info'" x-cloak x-transition>
+        <table class="w-full text-sm table-auto border-collapse border border-gray-200 rounded shadow-sm">
+          <tbody>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Project Code</th>
+              <td class="p-2">{{ project.project_code }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Location</th>
+              <td class="p-2">{{ project.location }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Client</th>
+              <td class="p-2">{{ project.client.name }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Contract Sum</th>
+              <td class="p-2">{{ project.contract_sum }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Contract Duration</th>
+              <td class="p-2">{{ project.contract_duration_months }} months</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Contract Signing Date</th>
+              <td class="p-2">{{ project.contract_signing_date|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Site Possession Date</th>
+              <td class="p-2">{{ project.site_possession_date|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Mobilization Start</th>
+              <td class="p-2">{{ project.mobilization_start|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Mobilization End</th>
+              <td class="p-2">{{ project.mobilization_end|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Commencement Date</th>
+              <td class="p-2">{{ project.commencement_date|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Practical Completion</th>
+              <td class="p-2">{{ project.practical_completion_date|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Delay Status</th>
+              <td class="p-2">{{ project.delay_status }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Defects Liability (days)</th>
+              <td class="p-2">{{ project.defects_liability_period_days }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Defects Start</th>
+              <td class="p-2">{{ project.defects_start|default:"N/A"|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Defects End</th>
+              <td class="p-2">{{ project.defects_end|default:"N/A"|date:"M d, Y" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Created At</th>
+              <td class="p-2">{{ project.created_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <th class="p-2 text-left bg-gray-50">Created By</th>
+              <td class="p-2">{{ project.created_by.username|default:"N/A" }}</td>
+            </tr>
+            <tr>
+              <th class="p-2 text-left bg-gray-50">Active</th>
+              <td class="p-2">{% if project.is_active %}Yes{% else %}No{% endif %}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ---------------- Participants ---------------- -->
+      <div x-show="tab==='participants'" x-cloak x-transition>
+        {% if project.participants.exists %}
+        <table class="w-full text-sm table-auto border-collapse border border-gray-200 rounded shadow-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b">
+              <th class="p-2 text-left">User</th>
+              <th class="p-2 text-left">Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in project.participants.all %}
+            <tr class="border-b hover:bg-gray-50">
+              <td class="p-2">{{ p.user.username|capfirst }}</td>
+              <td class="p-2">{{ p.project_role.name|capfirst }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-gray-400 italic">No participants assigned.</p>
+        {% endif %}
+      </div>
+
+      <!-- ---------------- Contractors ---------------- -->
+      <div x-show="tab==='contractors'" x-cloak x-transition>
+        {% if project.contractors.exists %}
+        <table class="w-full text-sm table-auto border-collapse border border-gray-200 rounded shadow-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b">
+              <th class="p-2 text-left">Contractor</th>
+              <th class="p-2 text-left">Work Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in project.contractors.all %}
+            <tr class="border-b hover:bg-gray-50">
+              <td class="p-2">{{ c.contractor.name|capfirst }}</td>
+              <td class="p-2">{{ c.work_description|capfirst }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-gray-400 italic">No contractors assigned.</p>
+        {% endif %}
+      </div>
+
+      <!-- ---------------- Documents ---------------- -->
+      <div x-show="tab==='documents'" x-cloak x-transition>
+        {% if project.documents.exists %}
+        <table class="w-full text-sm table-auto border-collapse border border-gray-200 rounded shadow-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b">
+              <th class="p-2 text-left">Title</th>
+              <th class="p-2 text-left">Uploaded At</th>
+              <th class="p-2 text-left">Uploaded By</th>
+              <th class="p-2 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for doc in project.documents.all %}
+            <tr class="border-b hover:bg-gray-50">
+              <td class="p-2 truncate max-w-xs">{{ doc.title|capfirst }}</td>
+              <td class="p-2">{{ doc.uploaded_at|date:"M d, Y H:i" }}</td>
+              <td class="p-2">{{ doc.uploaded_by.username|default:"N/A"|capfirst }}</td>
+              <td class="p-2 text-center">
+                <a href="{{ doc.document.url }}" target="_blank"
+                   class="px-2 py-1 text-xs sm:text-sm bg-green-500 hover:bg-green-600 text-white rounded">
+                  View
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-gray-400 italic">No documents uploaded.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

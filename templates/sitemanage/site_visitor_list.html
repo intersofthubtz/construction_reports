@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Site Visitors{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="space-y-2 mb-4">
+    {% for message in messages %}
+      <div class="px-4 py-2 rounded shadow-sm text-sm font-semibold
+                  {% if message.tags == 'success' %}bg-green-100 text-green-800
+                  {% elif message.tags == 'error' %}bg-red-100 text-red-800
+                  {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
+                  {% else %}bg-blue-100 text-blue-800{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+    <h2 class="text-2xl font-bold">Site Visitors</h2>
+
+    {% if perms.sitemanage.add_site_visitor %}
+    <a href="{% url 'sitemanage:site_visitor_add' %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-semibold">
+      + Upload Visitor Document
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex gap-3 mb-4 items-center">
+    <input type="text" name="q" id="searchInput" value="{{ search|default:'' }}"
+           placeholder="Search document..."
+           class="px-4 py-2 border rounded w-full sm:w-80">
+
+    {% if search %}
+    <a href="{% url 'sitemanage:site_visitor_list' %}"
+       class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="bg-white shadow overflow-x-auto rounded">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b text-xs uppercase text-gray-600">
+        <tr>
+          <th class="p-4 text-left">Document Name</th>
+          <th class="p-4 text-left">Visit Date</th>
+          <th class="p-4 text-left">Uploaded By</th>
+          <th class="p-4 text-left">Document</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-100">
+        {% if visitors %}
+          {% for v in visitors %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-4 font-semibold">{{ v.document_name|capfirst }}</td>
+            <td class="p-4">{{ v.visit_date|date:"d M Y" }}</td>
+            <td class="p-4">{{ v.created_by|capfirst }}</td>
+            <td class="p-4">
+              {% if v.document_file %}
+              <a href="{{ v.document_file.url }}" target="_blank" class="text-blue-600 underline">VIEW PDF</a>
+              {% else %}
+              —
+              {% endif %}
+            </td>
+            <td class="p-4 text-right flex gap-2 justify-end">
+              {% if perms.sitemanage.change_site_visitor %}
+              <a href="{% url 'sitemanage:site_visitor_edit' v.pk %}"
+                 class="px-3 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600">Edit</a>
+              {% endif %}
+              {% if perms.sitemanage.delete_site_visitor %}
+              <a href="{% url 'sitemanage:site_visitor_delete' v.pk %}"
+                 class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">Delete</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="p-6 text-center text-gray-500">No visitor documents found.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% include "partials/pagination.html" with page_obj=visitors search=search %}
+
+</div>
+
+<!-- Debounce search -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => form.submit(), 500); // submit after 500ms
+  });
+</script>
+
+{% endblock %}

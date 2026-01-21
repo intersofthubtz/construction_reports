@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">{{ page_title }}</h1>
+
+    <!-- Filter Form -->
+    <form method="get" class="bg-white p-6 rounded-lg shadow grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
+        <div>
+            {{ form.project_name.label_tag }}
+            {{ form.project_name }}
+        </div>
+        <div>
+            {{ form.activity_start.label_tag }}
+            {{ form.activity_start }}
+        </div>
+        <div>
+            {{ form.activity_end.label_tag }}
+            {{ form.activity_end }}
+        </div>
+        <div>
+            {{ form.status.label_tag }}
+            {{ form.status }}
+        </div>
+
+        <div class="md:col-span-4 flex gap-3 mt-2">
+            <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition">Filter</button>
+            <a href="{% url 'sitemanage:site_overview' %}" class="px-5 py-2 bg-gray-400 text-white rounded shadow hover:bg-gray-500 transition">Reset</a>
+        </div>
+    </form>
+
+    <!-- Projects List -->
+    {% if project_data %}
+        <div class="space-y-6">
+            {% for data in project_data %}
+            <div class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition">
+                <!-- Project Header -->
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">{{ data.project.project_name }}</h2>
+                    <p class="text-gray-500 text-sm">
+                        Start: {{ data.project.commencement_date|date:"M d, Y" }} | 
+                        End: {{ data.project.defects_end|default:"N/A"|date:"M d, Y" }}
+                    </p>
+                </div>
+
+                <!-- Activities -->
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">Activities & Progress</h3>
+                    {% if data.activities %}
+                        <ul class="space-y-1">
+                        {% for a in data.activities %}
+                            <li class="flex justify-between items-center bg-gray-50 p-2 rounded hover:bg-gray-100 transition">
+                                <span>
+                                    <strong>{{ a.activity.name }}</strong>
+                                    {% if a.latest_log %} - Last update: {{ a.latest_log.date|date:"M d, Y" }}{% endif %}
+                                </span>
+                                <span class="text-sm px-2 py-0.5 rounded
+                                    {% if a.activity.status == 'Completed' %} bg-green-100 text-green-800
+                                    {% elif a.activity.status == 'In Progress' %} bg-yellow-100 text-yellow-800
+                                    {% elif a.activity.status == 'Delayed' %} bg-red-100 text-red-800
+                                    {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                                    {{ a.activity.status }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-400 italic">No activities recorded.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Visitors -->
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">Site Visitors</h3>
+                    {% if data.visitors %}
+                        <ul class="space-y-1">
+                        {% for v in data.visitors %}
+                            <li class="bg-gray-50 p-2 rounded hover:bg-gray-100 transition">
+                                {{ v.document_name }} - <span class="text-gray-500 text-sm">{{ v.visit_date|date:"M d, Y" }}</span>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-400 italic">No visitors recorded.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Project Images -->
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">Project Images</h3>
+                    {% if data.images %}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            {% for img in data.images %}
+                            <div class="border rounded overflow-hidden shadow-sm hover:shadow-md transition">
+                                <img src="{{ img.image.url }}" alt="{{ img.figure_name }}" class="w-full h-40 object-cover">
+                                <div class="p-2 text-sm text-gray-700">
+                                    <div>{{ img.figure_name }}</div>
+                                    <div class="text-gray-500 text-xs">{{ img.image_date|date:"M d, Y" }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-400 italic">No images uploaded.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500 font-semibold">Select a project to view the Activity Progress!</p>
+    {% endif %}
+</div>
+
+<!-- AJAX Script to load activities dynamically -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const projectSelect = document.getElementById("id_project_name");
+    const activitySelect = document.getElementById("id_activity_name");
+
+    function loadActivities(projectId, selectedActivityId = null) {
+        if (!projectId) {
+            activitySelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        fetch(`{% url 'sitemanage:ajax_load_activities' %}?project_id=${projectId}`)
+            .then(response => response.text())
+            .then(html => {
+                activitySelect.innerHTML = html;
+                if (selectedActivityId) {
+                    activitySelect.value = selectedActivityId;
+                }
+            });
+    }
+
+    if (projectSelect) {
+        projectSelect.addEventListener("change", function () {
+            loadActivities(this.value);
+        });
+
+        {% if form.data.project_name %}
+            loadActivities("{{ form.data.project_name }}", "{{ form.data.activity_name|default:'' }}");
+        {% endif %}
+    }
+});
+</script>
+{% endblock %}

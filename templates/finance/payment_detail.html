@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Payment Certificate Details{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-5xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <a href="{% url 'finance:payment_list' %}"
+       class="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 text-sm font-semibold text-gray-700">
+      ← Back to Payments
+    </a>
+
+    <h2 class="text-2xl font-semibold text-gray-800">
+      Payment Certificate Details
+    </h2>
+  </div>
+
+  <!-- Details Card -->
+  <div class="bg-white shadow rounded-lg p-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 text-sm">
+
+      <div>
+        <p class="text-gray-500 font-semibold">Project</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.project.project_name }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Certificate No</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.certificate_no }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Date Certified</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.date_certified|date:"d M Y" }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Payment Date</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.payment_date|date:"d M Y" }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Certified Amount (TZS)</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.certified_amount|floatformat:2 }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Amount Paid (TZS)</p>
+        <p class="text-green-700 font-semibold">
+          {{ payment.amount_paid|floatformat:2 }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Amount From</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.amount_from }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Amount To</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.amount_to }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">PV Number</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.pv_no }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Created By</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.created_by|default:"—" }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-gray-500 font-semibold">Created At</p>
+        <p class="text-gray-800 font-medium">
+          {{ payment.created_at|date:"d M Y, H:i" }}
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex gap-3">
+    {% if perms.finance.change_paymentcertificate %}
+    <a href="{% url 'finance:payment_edit' payment.pk %}"
+       class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded font-semibold">
+      Edit Payment
+    </a>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

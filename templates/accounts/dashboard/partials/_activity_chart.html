@@ -1,0 +1,14 @@
+{% load static %}
+
+<div class="bg-white rounded-lg shadow p-5">
+  <h3 class="text-sm text-gray-500 mb-3">Activity Status</h3>
+  <canvas id="activityChart"></canvas>
+</div>
+
+<!-- Pass labels and counts from Django -->
+{{ activity_labels|json_script:"activity-labels" }}
+{{ activity_counts|json_script:"activity-counts" }}
+
+
+<!-- Your JS -->
+<script src="{% static 'js/dashboard/activity_chart.js' %}"></script>

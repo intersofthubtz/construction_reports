@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Work Categories{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+      <div class="px-4 py-2 rounded shadow-sm text-sm font-medium
+        {% if message.tags == 'success' %} bg-green-100 text-green-800
+        {% elif message.tags == 'error' %} bg-red-100 text-red-800
+        {% elif message.tags == 'warning' %} bg-yellow-100 text-yellow-800
+        {% else %} bg-blue-100 text-blue-800 {% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h2 class="text-2xl font-bold text-gray-800">Work Categories</h2>
+
+    {% if perms.setup.add_workcategory %}
+    <a href="{% url 'setup:work_category_create' %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+      + Add Work Category
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex flex-wrap gap-3 items-center mb-4">
+    <input
+      type="text"
+      id="searchInput"
+      name="q"
+      value="{{ search|default:'' }}"
+      placeholder="Search name or description..."
+      class="px-4 py-2 border rounded text-sm w-full sm:w-80"
+    />
+
+    {% if search %}
+    <a href="{% url 'setup:work_category_list' %}"
+       class="px-4 py-2 rounded border text-sm text-gray-600 hover:bg-gray-100">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="bg-white shadow overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr class="text-gray-600 uppercase text-xs tracking-wide">
+          <th class="p-4 text-left">Name</th>
+          <th class="p-4 text-left">Description</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        {% for category in categories %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="p-4 font-semibold capitalize">{{ category.name }}</td>
+          <td class="p-4 text-gray-700 capitalize">{{ category.description|default:"-" }}</td>
+          <td class="p-4 flex justify-end gap-2">
+            {% if perms.setup.change_workcategory %}
+            <a href="{% url 'setup:work_category_edit' category.pk %}"
+               class="px-3 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-xs font-semibold">
+              Edit
+            </a>
+            {% endif %}
+            {% if perms.setup.delete_workcategory %}
+            <a href="{% url 'setup:work_category_delete' category.pk %}"
+               class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs font-semibold">
+              Delete
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="p-6 text-center text-gray-500">
+            No work categories found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% include "partials/pagination.html" with page_obj=categories search=search %}
+
+</div>
+
+<!-- Debounced Search -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500);
+  });
+</script>
+
+{% endblock %}

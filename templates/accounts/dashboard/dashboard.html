@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-8">
+
+  <!-- Executive Summary -->
+  <div class="bg-white rounded-lg shadow p-5">
+    <p class="text-sm text-gray-600">
+      Real-time overview of projects, activities, and site engagement to support
+      operational monitoring and informed decision-making.
+    </p>
+  </div>
+
+  {% include "accounts/dashboard/partials/_kpi_cards.html" %}
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% include "accounts/dashboard/partials/_activity_chart.html" %}
+    {% include "accounts/dashboard/partials/_projects_summary.html" %}
+  </div>
+
+  {% include "accounts/dashboard/partials/_reports_actions.html" %}
+</div>
+{% endblock %}

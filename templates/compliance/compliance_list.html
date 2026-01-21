@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Compliance{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+    <div class="px-4 py-2 rounded text-sm font-semibold
+      {% if message.tags == 'success' %}
+        bg-green-100 text-green-700
+      {% elif message.tags == 'error' %}
+        bg-red-100 text-red-700
+      {% else %}
+        bg-blue-100 text-blue-700
+      {% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Header: Title + Add Button -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h2 class="text-2xl font-bold">Compliance</h2>
+
+    {% if perms.compliance.add_compliance %}
+    <a href="{% url 'compliance:compliance_add' %}"
+       class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      + Add Compliance
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form id="searchForm" method="get" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+    <input type="text"
+           name="q"
+           id="searchInput"
+           value="{{ search|default:'' }}"
+           placeholder="Search project, authority, status..."
+           class="px-4 py-2 border rounded w-full sm:w-80">
+
+    {% if search %}
+    <a href="{% url 'compliance:compliance_list' %}"
+       class="px-4 py-2 border rounded bg-gray-100 hover:bg-gray-200 text-gray-700">
+      Clear Search
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="bg-white shadow rounded overflow-x-auto mt-4">
+    <table class="w-full text-sm divide-y">
+      <thead class="bg-gray-50 border-b text-xs uppercase">
+        <tr>
+          <th class="p-4 text-left">Project</th>
+          <th class="p-4 text-left">Authority</th>
+          <th class="p-4 text-left">Reg. No</th>
+          <th class="p-4 text-left">Status</th>
+          <th class="p-4 text-left">Expiry</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        {% for c in compliances %}
+        <tr>
+          <td class="p-4 font-semibold">{{ c.project.project_name }}</td>
+          <td class="p-4">{{ c.authority.name }}</td>
+          <td class="p-4">{{ c.registration_no }}</td>
+          <td class="p-4">
+            {% if c.status == "Valid" %}
+              <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">Valid</span>
+            {% elif c.status == "Expired" %}
+              <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">Expired</span>
+            {% else %}
+              <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Pending</span>
+            {% endif %}
+          </td>
+          <td class="p-4">{{ c.expiry_date|date:"M d, Y" }}</td>
+          <td class="p-4 text-right flex justify-end gap-2">
+            {% if perms.compliance.change_compliance %}
+            <a href="{% url 'compliance:compliance_edit' c.pk %}"
+               class="px-3 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600">
+               Edit
+            </a>
+            {% endif %}
+            {% if perms.compliance.delete_compliance %}
+            <a href="{% url 'compliance:compliance_delete' c.pk %}"
+               class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-700">
+               Delete
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-6 text-center text-gray-500">
+            No compliance records found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if compliances.has_other_pages %}
+    {% include "partials/pagination.html" with page_obj=compliances search=search %}
+  {% endif %}
+
+</div>
+
+<!-- Debounce search JS -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500);
+  });
+</script>
+
+{% endblock %}

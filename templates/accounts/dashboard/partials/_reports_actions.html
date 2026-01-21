@@ -1,0 +1,14 @@
+<div class="bg-white rounded-lg shadow p-5">
+  <h3 class="text-sm text-gray-500 mb-4">Reports</h3>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {% for key, can_view in reports_children.items %}
+      {% if can_view %}
+        <a href="{% url 'reports:'|add:key|add:'_report' %}"
+           class="border rounded-lg p-4 hover:bg-gray-50 transition">
+          <p class="font-semibold capitalize">{{ key }} Report</p>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Progress Report{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+
+  <h1 class="text-2xl font-bold mb-6">Project Progress Report</h1>
+
+  {% if perms.reports.view_progressreport %}
+
+  <!-- ================= FILTER FORM ================= -->
+  <form method="get" class="bg-white p-6 rounded shadow space-y-4 mb-6">
+
+    <div>
+      <label class="block font-medium mb-1">Project</label>
+      <select name="project" class="w-full border rounded px-3 py-2">
+        <option value="">-- Select Project --</option>
+        {% for p in projects %}
+          <option value="{{ p.id }}"
+            {% if filter_project == p.id|stringformat:"s" %}selected{% endif %}>
+            {{ p.project_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="flex gap-4">
+      <div class="flex-1">
+        <label class="block font-medium mb-1">From Date</label>
+        <input type="date" name="from_date"
+               value="{{ filter_from }}"
+               class="w-full border rounded px-3 py-2">
+      </div>
+
+      <div class="flex-1">
+        <label class="block font-medium mb-1">To Date</label>
+        <input type="date" name="to_date"
+               value="{{ filter_to }}"
+               class="w-full border rounded px-3 py-2">
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="flex gap-4 flex-wrap">
+      <button type="submit"
+              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Filter
+      </button>
+
+      <a href="{% url 'reports:progress_report' %}"
+         class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+        Clear
+      </a>
+
+      {% if is_filtered %}
+        <span class="px-4 py-2 border rounded text-green-700">
+          Results Loaded
+        </span>
+      {% else %}
+        <span class="px-4 py-2 border rounded text-gray-500">
+          Select filters to view progress
+        </span>
+      {% endif %}
+    </div>
+
+  </form>
+
+  <!-- ================= RESULTS ================= -->
+  {% if is_filtered %}
+
+  <!-- ===== ACTIVITIES TABLE ===== -->
+  <h2 class="text-xl font-semibold mb-2">Activities</h2>
+  <div class="overflow-x-auto mb-8">
+    <table class="w-full border text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 border">Project</th>
+          <th class="p-2 border">Activity</th>
+          <th class="p-2 border">Category</th>
+          <th class="p-2 border">Planned</th>
+          <th class="p-2 border">Actual</th>
+          <th class="p-2 border">Progress</th>
+          <th class="p-2 border">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in activities %}
+        <tr>
+          <td class="p-2 border">{{ a.project.project_name }}</td>
+          <td class="p-2 border">{{ a.name }}</td>
+          <td class="p-2 border">{{ a.category.name|default:"-" }}</td>
+          <td class="p-2 border">
+            {{ a.planned_start }} → {{ a.planned_end }}
+          </td>
+          <td class="p-2 border">
+            {{ a.actual_start|default:"-" }} → {{ a.actual_end|default:"-" }}
+          </td>
+          <td class="p-2 border font-semibold">
+            {{ a.progress_percent }}%
+          </td>
+          <td class="p-2 border">
+            {{ a.status }}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center p-3 text-gray-500">
+            No activities found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== PROGRESS LOGS ===== -->
+  <h2 class="text-xl font-semibold mb-2">Progress Logs</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full border text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 border">Date</th>
+          <th class="p-2 border">Project</th>
+          <th class="p-2 border">Activity</th>
+          <th class="p-2 border">Progress</th>
+          <th class="p-2 border">Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in progress_logs %}
+        <tr>
+          <td class="p-2 border">{{ log.date }}</td>
+          <td class="p-2 border">{{ log.activity.project.project_name }}</td>
+          <td class="p-2 border">{{ log.activity.name }}</td>
+          <td class="p-2 border font-semibold">
+            {{ log.progress_percent }}%
+          </td>
+          <td class="p-2 border">{{ log.remarks|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center p-3 text-gray-500">
+            No progress logs found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+    <p class="text-center text-gray-400 mt-8">
+      Please select a project or date range and click <strong>Filter</strong>.
+    </p>
+  {% endif %}
+
+  {% else %}
+    <p class="text-red-600 font-semibold">
+      You do not have permission to view this report.
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

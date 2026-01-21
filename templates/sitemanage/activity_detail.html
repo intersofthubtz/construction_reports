@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Activity Details{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'sitemanage:activity_list' %}"
+       class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300
+              text-gray-700 text-sm font-semibold flex items-center">
+      ← Back to Activities
+    </a>
+
+    <h2 class="text-2xl font-bold text-gray-800">
+      Activity Details
+    </h2>
+  </div>
+
+  <!-- Activity Details Card -->
+  <div class="bg-white p-6 rounded-xl shadow space-y-6">
+
+    <!-- Top Info -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+
+      <!-- Block -->
+      <div>
+        <p class="text-gray-500 font-medium">Project</p>
+        <p class="text-gray-900 font-semibold uppercase">
+          {{ activity.project.project_name }}
+        </p>
+      </div>
+
+      <!-- Category -->
+      <div>
+        <p class="text-gray-500 font-medium">Category</p>
+        <p class="text-gray-900 font-semibold capitalize">
+          {% if activity.category %}
+            {{ activity.category.name }}
+          {% else %}
+            -
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Activity Name -->
+      <div>
+        <p class="text-gray-500 font-medium">Activity Name</p>
+        <p class="text-gray-900 font-semibold uppercase">
+          {{ activity.name }}
+        </p>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <p class="text-gray-500 font-medium">Description</p>
+        <p class="text-gray-800 leading-relaxed capitalize">
+          {{ activity.description|default:"-" }}
+        </p>
+      </div>
+
+      <!-- Planned Start -->
+      <div>
+        <p class="text-gray-500 font-medium">Planned Start</p>
+        <p class="text-gray-900 font-semibold">
+          {{ activity.planned_start|default:"-" }}
+        </p>
+      </div>
+
+      <!-- Planned End -->
+      <div>
+        <p class="text-gray-500 font-medium">Planned End</p>
+        <p class="text-gray-900 font-semibold">
+          {{ activity.planned_end|default:"-" }}
+        </p>
+      </div>
+
+      <!-- Actual Start -->
+      <div>
+        <p class="text-gray-500 font-medium">Actual Start</p>
+        <p class="text-gray-900 font-semibold">
+          {{ activity.actual_start|default:"-" }}
+        </p>
+      </div>
+
+      <!-- Actual End -->
+      <div>
+        <p class="text-gray-500 font-medium">Actual End</p>
+        <p class="text-gray-900 font-semibold">
+          {{ activity.actual_end|default:"-" }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Progress + Status -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+
+      <!-- Progress -->
+      <div>
+        <p class="text-gray-500 font-medium mb-1">Progress</p>
+        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mb-1">
+          <div
+            class="h-full rounded-full transition-all duration-500
+            {% if activity.progress_percent >= 80 %} bg-green-500
+            {% elif activity.progress_percent >= 50 %} bg-blue-500
+            {% elif activity.progress_percent >= 25 %} bg-yellow-500
+            {% else %} bg-red-500 {% endif %}"
+            style="width: {{ activity.progress_percent|default:0 }}%;">
+          </div>
+        </div>
+        <p class="text-gray-700 text-sm font-semibold">
+          {{ activity.progress_percent|default:"0" }}%
+        </p>
+      </div>
+
+      <!-- Status -->
+      <div>
+        <p class="text-gray-500 font-medium mb-1">Status</p>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase
+          {% if activity.status == 'Completed' %} bg-green-100 text-green-700
+          {% elif activity.status == 'In Progress' %} bg-blue-100 text-blue-700
+          {% elif activity.status == 'Delayed' %} bg-red-100 text-red-700
+          {% else %} bg-gray-100 text-gray-700 {% endif %}">
+          {{ activity.status|default:"-" }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

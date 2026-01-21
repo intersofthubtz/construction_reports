@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Delete Progress Cover{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-lg mx-auto mt-12">
+  <h2 class="text-xl font-semibold mb-4">Delete Progress Cover</h2>
+
+  <form method="post" class="bg-white shadow rounded p-6 space-y-4">
+    {% csrf_token %}
+    <p>
+      Are you sure you want to delete the progress cover for 
+      <strong>{{ cover.project.project_name }} - Report {{ cover.report_no }}</strong>?
+    </p>
+
+    {% if cover.cover_image %}
+    <div class="mt-2">
+      <p class="text-gray-500 text-sm mb-1">Current Cover Image:</p>
+      <img src="{{ cover.cover_image.url }}" alt="Cover Image"
+           class="w-40 h-auto rounded border shadow-sm">
+    </div>
+    {% endif %}
+
+    <div class="flex gap-3 mt-4">
+      <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        Yes, Delete
+      </button>
+      <a href="{% url 'reports:progress_cover_list' %}" 
+         class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

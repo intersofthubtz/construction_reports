@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Progress Report Covers{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+
+  <!-- ================= MESSAGES ================= -->
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+    <div class="px-4 py-2 rounded text-sm font-semibold
+      {% if message.tags == 'success' %}
+        bg-green-100 text-green-700
+      {% elif message.tags == 'error' %}
+        bg-red-100 text-red-700
+      {% else %}
+        bg-blue-100 text-blue-700
+      {% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ================= HEADER: CREATE + SEARCH ================= -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+
+    <!-- Create Button -->
+    {% if perms.reports.add_progressreportcover %}
+    <a href="{% url 'reports:progress_cover_create' %}"
+       class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+       Generate Progress Report Cover
+    </a>
+    {% endif %}
+
+    <!-- Search -->
+    <form id="searchForm" method="get" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+      <input type="text"
+             name="q"
+             id="searchInput"
+             value="{{ search|default:'' }}"
+             placeholder="Search by project or report no..."
+             class="flex-1 px-3 py-2 border-2 border-gray-400 rounded
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                    focus:border-blue-500">
+      {% if search %}
+      <a href="{% url 'reports:progress_cover_list' %}"
+         class="px-4 py-2 border rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+        Clear Search
+      </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- ================= COVERS TABLE ================= -->
+  <div class="bg-white shadow rounded overflow-x-auto mt-4">
+    <table class="w-full text-sm divide-y border border-gray-300">
+      <thead class="bg-gray-100 text-gray-700 uppercase text-left">
+        <tr>
+          <th class="p-4">Project</th>
+          <th class="p-4">Report No</th>
+          <th class="p-4">Period</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        {% for cover in covers %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="p-4 font-semibold">{{ cover.project.project_name }}</td>
+          <td class="p-4">{{ cover.report_no }}</td>
+          <td class="p-4">{{ cover.period_from|date:"M d, Y" }} → {{ cover.period_to|date:"M d, Y" }}</td>
+          <td class="p-4 text-right flex justify-end gap-2">
+            {% if perms.reports.view_progressreportcover %}
+            <a href="{% url 'reports:progress_cover_pdf' cover.id %}" target="_blank"
+               class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition">
+               View PDF
+            </a>
+            {% endif %}
+            {% if perms.reports.change_progressreportcover %}
+            <a href="{% url 'reports:progress_cover_edit' cover.id %}"
+               class="px-3 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition">
+               Edit
+            </a>
+            {% endif %}
+            {% if perms.reports.delete_progressreportcover %}
+            <a href="{% url 'reports:progress_cover_delete' cover.id %}"
+               class="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition">
+               Delete
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="p-6 text-center text-gray-500">
+            No progress covers found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= PAGINATION ================= -->
+  {% if covers.has_other_pages %}
+    {% include "partials/pagination.html" with page_obj=covers search=search %}
+  {% endif %}
+
+</div>
+
+<!-- ================= DEBOUNCE SEARCH JS ================= -->
+<script>
+  let timer;
+  const input = document.getElementById('searchInput');
+  const form = document.getElementById('searchForm');
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      form.submit();
+    }, 500); 
+  });
+</script>
+
+{% endblock %}

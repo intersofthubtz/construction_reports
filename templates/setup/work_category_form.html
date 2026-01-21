@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if work_category %}Edit{% else %}Add{% endif %} Work Category
+{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-xl">
+
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'setup:work_category_list' %}" class="px-3 py-2 rounded shadow bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-semibold">
+      ← Back
+    </a>
+    <h2 class="text-2xl font-semibold">
+      {% if work_category %}Edit{% else %}Add{% endif %} Work Category
+    </h2>
+  </div>
+
+  <form method="post" class="bg-white shadow rounded p-6 space-y-5">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="bg-red-100 text-red-700 p-3 rounded">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <!-- Name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Name <span class="text-red-500">*</span>
+      </label>
+      {{ form.name }}
+      {% if form.name.errors %}
+      <p class="text-red-600 text-sm mt-1">{{ form.name.errors|striptags }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      {{ form.description }}
+      {% if form.description.errors %}
+      <p class="text-red-600 text-sm mt-1">{{ form.description.errors|striptags }}</p>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-3 pt-4">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+      <a href="{% url 'setup:work_category_list' %}" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

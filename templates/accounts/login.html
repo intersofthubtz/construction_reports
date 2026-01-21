@@ -1,0 +1,83 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Login - NHC Integrated System{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+  <div class="bg-white shadow-lg rounded-lg flex flex-col md:flex-row w-full max-w-3xl overflow-hidden">
+
+    <!-- LEFT SECTION: Branding -->
+    <div class="md:w-1/2 bg-[#208DCE] text-white flex flex-col justify-center items-center p-6">
+      <h1 class="text-2xl font-bold text-center mb-4">NHC INTEGRATED SYSTEM</h1>
+
+      <div class="w-40 h-40 rounded-lg border-4 border-white shadow-sm bg-white flex items-center justify-center overflow-hidden p-4">
+        <img src="{% static 'images/nhc_logo.jpg' %}" alt="NHC Logo" class="max-w-full max-h-full object-contain" />
+      </div>
+    </div>
+
+    <!-- RIGHT SECTION: Login Form -->
+    <div class="md:w-1/2 flex items-center justify-center p-6 bg-gray-50">
+      <div class="w-full max-w-sm">
+        <h2 class="text-3xl font-semibold text-[#0F5391] mb-2">Login</h2>
+        <p class="text-gray-600 mb-4 text-sm">Enter your credentials to access the system.</p>
+
+        <form method="POST" class="space-y-3">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="bg-red-100 text-red-700 p-2 rounded text-sm">
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+          <!-- Username -->
+          <div>
+            <label class="block text-gray-700 font-medium text-sm mb-1">Username</label>
+            <input
+              type="text"
+              name="username"
+              value="{{ form.username.value|default_if_none:'' }}"
+              class="w-full p-2 border border-gray-300 rounded bg-yellow-50 focus:border-[#208DCE] focus:ring-1 focus:ring-[#208DCE] text-sm"
+              required
+            />
+            {% for error in form.username.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label class="block text-gray-700 font-medium text-sm mb-1">Password</label>
+            <input
+              type="password"
+              name="password"
+              class="w-full p-2 border border-gray-300 rounded bg-yellow-50 focus:border-[#208DCE] focus:ring-1 focus:ring-[#208DCE] text-sm"
+              required
+            />
+            {% for error in form.password.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Forgot Password -->
+          <div class="flex justify-end text-xs">
+            <a href="#" class="text-[#208DCE] hover:underline">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="w-full bg-[#208DCE] text-white p-2.5 rounded text-sm hover:bg-[#0F5391] transition">
+            Login
+          </button>
+        </form>
+
+        <!-- Footer -->
+        <p class="text-xs text-gray-500 text-center mt-4">
+          &copy; {% now "Y" %} NHC Integrated System
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

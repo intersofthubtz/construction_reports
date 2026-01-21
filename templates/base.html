@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  x-cloak
+  x-data="{
+    sidebarOpen: localStorage.getItem('sidebarOpen') === 'false' ? false : true
+  }"
+  x-init="$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', value))"
+>
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>{% block title %}NHC DC{% endblock %}</title>
+
+    {% load static %}
+
+    <!-- Tailwind CSS (CDN – acceptable for admin/internal systems) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- Google Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Inter Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      href="{% static 'images/nhc_logo.jpg' %}"
+      type="image/x-icon"
+    />
+    <link
+      rel="icon"
+      href="{% static 'images/nhc_logo.jpg' %}"
+      type="image/x-icon"
+    />
+
+    <!-- Prevent Alpine Flash -->
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-100 h-screen overflow-hidden">
+
+    <div class="flex h-screen">
+
+      <!-- SIDEBAR -->
+      {% include "accounts/sidebar.html" %}
+
+      <!-- MAIN CONTENT -->
+      <div class="flex-1 flex flex-col" role="main">
+
+        <!-- HEADER -->
+        {% include "accounts/header.html" %}
+
+        <!-- PAGE CONTENT -->
+        <main
+          class="flex-1 overflow-y-auto p-6"
+          role="region"
+          aria-label="Page content"
+        >
+          {% block content %}{% endblock %}
+        </main>
+
+      </div>
+
+    </div>
+
+  </body>
+</html>

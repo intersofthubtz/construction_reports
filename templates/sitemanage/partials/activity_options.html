@@ -1,0 +1,7 @@
+<option value="">---------</option>
+{% for activity in activities %}
+  <option value="{{ activity.id }}"
+    {% if activity.id|stringformat:"s" == request.GET.selected_activity|default:"" %}selected{% endif %}>
+    {{ activity.name }} ({{ activity.planned_start }} - {{ activity.planned_end }})
+  </option>
+{% endfor %}

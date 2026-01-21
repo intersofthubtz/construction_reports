@@ -1,0 +1,53 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 text-sm">
+
+  <!-- Page info -->
+  <span class="text-gray-600">
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+  </span>
+
+  <!-- Pagination links -->
+  <div class="flex flex-wrap gap-1 items-center">
+
+    {% if page_obj.has_previous %}
+      <a href="?{% if search %}q={{ search }}&{% endif %}page=1"
+         class="px-3 py-1 border rounded hover:bg-gray-100">
+        « First
+      </a>
+
+      <a href="?{% if search %}q={{ search }}&{% endif %}page={{ page_obj.previous_page_number }}"
+         class="px-3 py-1 border rounded hover:bg-gray-100">
+        ‹ Prev
+      </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+        {% if num == page_obj.number %}
+          <span class="px-3 py-1 bg-blue-600 text-white rounded">
+            {{ num }}
+          </span>
+        {% else %}
+          <a href="?{% if search %}q={{ search }}&{% endif %}page={{ num }}"
+             class="px-3 py-1 border rounded hover:bg-gray-100">
+            {{ num }}
+          </a>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a href="?{% if search %}q={{ search }}&{% endif %}page={{ page_obj.next_page_number }}"
+         class="px-3 py-1 border rounded hover:bg-gray-100">
+        Next ›
+      </a>
+
+      <a href="?{% if search %}q={{ search }}&{% endif %}page={{ page_obj.paginator.num_pages }}"
+         class="px-3 py-1 border rounded hover:bg-gray-100">
+        Last »
+      </a>
+    {% endif %}
+
+  </div>
+</div>
+{% endif %}
